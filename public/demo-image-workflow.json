@@ -101,10 +101,40 @@
           "text": "When you export to SugarCube, image blocks become <img> tags with matching alignment classes."
         },
         {
-          "kind": "goto_scene",
-          "id": "b_back_to_start",
-          "sceneName": "startup",
-          "label": ""
+          "kind": "choice",
+          "id": "b_gallery_choice",
+          "options": [
+            {
+              "id": "opt_gallery_back",
+              "text": "Back to startup",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "goto_scene",
+                  "id": "b_back_to_start",
+                  "sceneName": "startup",
+                  "label": ""
+                }
+              ]
+            },
+            {
+              "id": "opt_gallery_end",
+              "text": "End demo",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "ending",
+                  "id": "b_end_gallery_demo"
+                }
+              ]
+            }
+          ]
         }
       ]
     }
