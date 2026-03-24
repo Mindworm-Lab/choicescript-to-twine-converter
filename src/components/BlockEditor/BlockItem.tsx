@@ -17,38 +17,16 @@ interface Props {
   blockPath: number[];
   block: Block;
   index: number;
+  blocksLength: number;
   nestLevel: number;
 }
 
 // These block kinds render their editor inline in the row (single-line)
 const INLINE_KINDS = new Set(["image", "set", "goto", "goto_scene", "label", "finish", "ending", "comment"]);
 
-export default function BlockItem({ sceneId, blockPath, block, index, nestLevel }: Props) {
-  const { deleteBlock, moveBlock } = useProjectStore();
-  const blocksLength = useProjectStore(s => {
-    const scene = s.project.scenes.find(sc => sc.id === sceneId);
-    if (!scene) return 0;
-    function getBlocks(blocks: Block[], path: number[]): Block[] {
-      if (path.length === 0) return blocks;
-      const [i, ...rest] = path;
-      const b = blocks[i];
-      if (!b) return [];
-      if (b.kind === "choice" && rest.length >= 1) {
-        const [oi, ...deeper] = rest;
-        const opt = b.options[oi];
-        if (!opt) return [];
-        return getBlocks(opt.blocks, deeper);
-      }
-      if (b.kind === "if" && rest.length >= 1) {
-        const [bi2, ...deeper] = rest;
-        const branch = b.branches[bi2];
-        if (!branch) return [];
-        return getBlocks(branch.blocks, deeper);
-      }
-      return [];
-    }
-    return getBlocks(scene.blocks, blockPath).length;
-  });
+export default function BlockItem({ sceneId, blockPath, block, index, blocksLength, nestLevel }: Props) {
+  const deleteBlock = useProjectStore(s => s.deleteBlock);
+  const moveBlock = useProjectStore(s => s.moveBlock);
 
   const blockFullPath = [...blockPath, index];
   const isInline = INLINE_KINDS.has(block.kind);

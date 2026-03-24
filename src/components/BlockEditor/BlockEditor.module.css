@@ -5,6 +5,10 @@
   gap: 0;
 }
 
+.blockList .sectionBtn {
+  margin-left: 13px;
+}
+
 .emptyBlocks {
   font-size: 11px;
   color: var(--editor-text-dim);
