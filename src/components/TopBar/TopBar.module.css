@@ -82,6 +82,33 @@
   flex-shrink: 0;
 }
 
+.saveStatus {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--chrome-border2);
+  background: var(--chrome-raised);
+  white-space: nowrap;
+}
+
+.saved {
+  color: var(--chrome-text-sub);
+}
+
+.unsaved {
+  color: var(--accent-hover);
+  border-color: var(--accent);
+}
+
+.currentFile {
+  font-size: 11px;
+  color: var(--chrome-text-sub);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .right {
   display: flex;
   align-items: center;
