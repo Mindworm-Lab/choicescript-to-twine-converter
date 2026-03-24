@@ -89,7 +89,44 @@ function parseChoiceOptionLine(rawTrimmed: string): {
   return null;
 }
 
-function parseChoiceOptions(cursor: ParseCursor, level: number): ChoiceOption[] {
+function combineConditionExpr(base: string | null, next: string | null): string | null {
+  if (base && next) return `(${base}) and (${next})`;
+  return base ?? next;
+}
+
+function conditionToExpression(input: {
+  conditionMode: "simple" | "advanced";
+  conditions: Condition[];
+  conditionRaw: string;
+}): string | null {
+  if (input.conditionMode === "advanced") {
+    const raw = input.conditionRaw.trim();
+    return raw ? raw : null;
+  }
+  const first = input.conditions[0];
+  if (!first) return null;
+  return `${first.variable} ${first.operator} ${first.value}`;
+}
+
+function applyInheritedChoiceCondition(
+  option: Omit<ChoiceOption, "id" | "blocks">,
+  inheritedConditionExpr: string | null,
+): Omit<ChoiceOption, "id" | "blocks"> {
+  if (!inheritedConditionExpr) return option;
+
+  const ownConditionExpr = conditionToExpression(option);
+  const combinedExpr = combineConditionExpr(inheritedConditionExpr, ownConditionExpr);
+  if (!combinedExpr) return option;
+
+  return {
+    ...option,
+    conditionMode: "advanced",
+    conditions: [],
+    conditionRaw: combinedExpr,
+  };
+}
+
+function parseChoiceOptions(cursor: ParseCursor, level: number, inheritedConditionExpr: string | null = null): ChoiceOption[] {
   const options: ChoiceOption[] = [];
 
   while (cursor.pos < cursor.lines.length) {
@@ -103,15 +140,56 @@ function parseChoiceOptions(cursor: ParseCursor, level: number): ChoiceOption[] 
     if (parsedOption) {
       cursor.pos++;
       const blocks = parseBlocksAtLevel(cursor, level + 1);
+      const optionWithInherited = applyInheritedChoiceCondition(parsedOption, inheritedConditionExpr);
       options.push({
         id: nanoid(),
-        text: parsedOption.text,
-        conditionMode: parsedOption.conditionMode,
-        conditions: parsedOption.conditions,
-        conditionRaw: parsedOption.conditionRaw,
-        visibility: parsedOption.visibility,
+        text: optionWithInherited.text,
+        conditionMode: optionWithInherited.conditionMode,
+        conditions: optionWithInherited.conditions,
+        conditionRaw: optionWithInherited.conditionRaw,
+        visibility: optionWithInherited.visibility,
         blocks,
       });
+      continue;
+    }
+
+    const ifMatch = trimmed.match(/^\*if\s+\(([^)]+)\)$/);
+    if (ifMatch) {
+      const firstBranchCondition = ifMatch[1].trim();
+      cursor.pos++;
+      options.push(...parseChoiceOptions(cursor, level + 1, combineConditionExpr(inheritedConditionExpr, firstBranchCondition)));
+
+      while (cursor.pos < cursor.lines.length) {
+        const branchLine = cursor.lines[cursor.pos];
+        if (!branchLine.trim()) {
+          cursor.pos++;
+          continue;
+        }
+
+        const branchIndent = getIndentLevel(branchLine);
+        if (branchIndent < level) break;
+        if (branchIndent > level) {
+          cursor.pos++;
+          continue;
+        }
+
+        const branchTrimmed = branchLine.trim();
+        const elseifMatch = branchTrimmed.match(/^\*elseif\s+\(([^)]+)\)$/);
+        if (elseifMatch) {
+          cursor.pos++;
+          options.push(...parseChoiceOptions(cursor, level + 1, combineConditionExpr(inheritedConditionExpr, elseifMatch[1].trim())));
+          continue;
+        }
+
+        if (branchTrimmed === "*else") {
+          cursor.pos++;
+          options.push(...parseChoiceOptions(cursor, level + 1, inheritedConditionExpr));
+          continue;
+        }
+
+        break;
+      }
+
       continue;
     }
 
