@@ -26,6 +26,7 @@ export type GameProject = {
   author: string;
   scenes: Scene[];
   variables: Variable[];
+  achievements: Achievement[];
   nodePositions?: Record<string, { x: number; y: number }>;
   exportStyle?: ExportStyle;
 };
@@ -43,6 +44,16 @@ export type Variable = {
   type: "number" | "boolean" | "string";
   defaultValue: string | number | boolean;
   description: string;
+};
+
+export type Achievement = {
+  id: string;
+  key: string;
+  visibility: "visible" | "hidden";
+  points: number;
+  title: string;
+  beforeText: string;
+  afterText: string;
 };
 
 export type Block =

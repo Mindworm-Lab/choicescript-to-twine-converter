@@ -89,6 +89,7 @@ function buildImportReportText(input: {
   fileCount: number;
   sceneCount: number;
   variableCount: number;
+  achievementCount: number;
   usedSceneList: boolean;
   missingSceneListEntries: number;
   extraSceneFilesAppended: number;
@@ -100,6 +101,7 @@ function buildImportReportText(input: {
     `Text files scanned: ${input.fileCount}`,
     `Scenes imported: ${input.sceneCount}`,
     `Variables imported: ${input.variableCount}`,
+    `Achievements imported: ${input.achievementCount}`,
     `*scene_list detected: ${input.usedSceneList ? "yes" : "no"}`,
   ];
 
@@ -283,6 +285,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
         fileCount: report.sourceTextFileCount,
         sceneCount: report.importedSceneCount,
         variableCount: report.importedVariableCount,
+        achievementCount: report.importedAchievementCount,
         usedSceneList: report.usedSceneList,
         missingSceneListEntries: report.missingSceneListEntries,
         extraSceneFilesAppended: report.extraSceneFilesAppended,

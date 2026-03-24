@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { nanoid } from "nanoid";
-import type { GameProject, Scene, Variable, Block, ChoiceOption, IfBranch, ExportStyle } from "../types";
+import type { GameProject, Scene, Variable, Achievement, Block, ChoiceOption, IfBranch, ExportStyle } from "../types";
 
 const MAX_HISTORY = 50;
 
@@ -50,6 +50,14 @@ function defaultProject(): GameProject {
       },
     ],
     variables: [],
+    achievements: [],
+  };
+}
+
+function normalizeProject(project: GameProject): GameProject {
+  return {
+    ...project,
+    achievements: Array.isArray(project.achievements) ? project.achievements : [],
   };
 }
 
@@ -76,6 +84,11 @@ interface ProjectState {
   addVariable: (partial: Partial<Variable>) => void;
   updateVariable: (variableId: string, partial: Partial<Variable>) => void;
   deleteVariable: (variableId: string) => void;
+
+  // Achievements
+  addAchievement: (partial: Partial<Achievement>) => void;
+  updateAchievement: (achievementId: string, partial: Partial<Achievement>) => void;
+  deleteAchievement: (achievementId: string) => void;
 
   // Blocks
   addBlock: (sceneId: string, blockPath: number[], kind: Block["kind"], afterIndex: number) => void;
@@ -208,6 +221,34 @@ export const useProjectStore = create<ProjectState>()(
       if (idx === -1) return;
       pushHistory(state, state.project);
       state.project.variables.splice(idx, 1);
+    }),
+
+    addAchievement: (partial) => set(state => {
+      pushHistory(state, state.project);
+      const achievement: Achievement = {
+        id: nanoid(),
+        key: partial.key?.trim() || `achievement_${state.project.achievements.length + 1}`,
+        visibility: partial.visibility ?? "visible",
+        points: partial.points ?? 5,
+        title: partial.title ?? "New Achievement",
+        beforeText: partial.beforeText ?? "",
+        afterText: partial.afterText ?? "",
+      };
+      state.project.achievements.push(achievement);
+    }),
+
+    updateAchievement: (achievementId, partial) => set(state => {
+      const achievement = state.project.achievements.find(a => a.id === achievementId);
+      if (!achievement) return;
+      pushHistory(state, state.project);
+      Object.assign(achievement, partial);
+    }),
+
+    deleteAchievement: (achievementId) => set(state => {
+      const idx = state.project.achievements.findIndex(a => a.id === achievementId);
+      if (idx === -1) return;
+      pushHistory(state, state.project);
+      state.project.achievements.splice(idx, 1);
     }),
 
     addBlock: (sceneId, blockPath, kind, afterIndex) => set(state => {
@@ -391,8 +432,9 @@ export const useProjectStore = create<ProjectState>()(
     }),
 
     loadProject: (project) => set(state => {
-      state.project = project;
-      state.activeSceneId = project.scenes[0]?.id ?? "";
+      const normalized = normalizeProject(project);
+      state.project = normalized;
+      state.activeSceneId = normalized.scenes[0]?.id ?? "";
       state.activeBlockId = null;
       state.revision += 1;
       state.history = [];

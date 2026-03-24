@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { Block, ChoiceOption, IfBranch, Condition, Variable } from "../types";
+import type { Block, ChoiceOption, IfBranch, Condition, Variable, Achievement } from "../types";
 
 interface ParseCursor {
   lines: string[];
@@ -339,6 +339,7 @@ export interface ParseResult {
     title?: string;
     author?: string;
     variables?: Variable[];
+    achievements?: Achievement[];
   };
 }
 
@@ -349,18 +350,20 @@ export function parseSceneText(text: string, filename: string): ParseResult {
   let title: string | undefined;
   let author: string | undefined;
   const variables: Variable[] = [];
+  const achievements: Achievement[] = [];
   const seenVariables = new Set<string>();
 
   // For startup scene, extract meta from all lines.
   // Some projects place *scene_list before the bulk of *create commands.
   if (filename === "startup") {
-    for (const raw of lines) {
-      const line = raw.trim();
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index].trim();
       if (!line) continue;
 
       const titleMatch = line.match(/^\*title\s+(.+)$/);
       const authorMatch = line.match(/^\*author\s+(.+)$/);
       const createMatch = line.match(/^\*create\s+(\w+)\s+(.*)$/);
+      const achievementMatch = line.match(/^\*achievement\s+(\w+)\s+(visible|hidden)\s+(\d+)\s+(.+)$/i);
 
       if (!title && titleMatch) {
         title = titleMatch[1].trim();
@@ -386,6 +389,44 @@ export function parseSceneText(text: string, filename: string): ParseResult {
         }
         variables.push({ id: nanoid(), name, type, defaultValue, description: "" });
         seenVariables.add(normalizedName);
+      } else if (achievementMatch) {
+        const key = achievementMatch[1].trim();
+        if (!key) continue;
+
+        const visibility = achievementMatch[2].toLowerCase() === "hidden" ? "hidden" : "visible";
+        const points = Number.parseInt(achievementMatch[3], 10) || 0;
+        const achievementTitle = achievementMatch[4].trim();
+
+        let beforeText = "";
+        let afterText = "";
+
+        for (let next = index + 1; next < lines.length; next++) {
+          const descRaw = lines[next];
+          const descTrimmed = descRaw.trim();
+          if (!descTrimmed) continue;
+          if (descTrimmed.startsWith("*") || descTrimmed.startsWith("#")) break;
+          beforeText = descTrimmed;
+
+          for (let after = next + 1; after < lines.length; after++) {
+            const postRaw = lines[after];
+            const postTrimmed = postRaw.trim();
+            if (!postTrimmed) continue;
+            if (postTrimmed.startsWith("*") || postTrimmed.startsWith("#")) break;
+            afterText = postTrimmed;
+            break;
+          }
+          break;
+        }
+
+        achievements.push({
+          id: nanoid(),
+          key,
+          visibility,
+          points,
+          title: achievementTitle,
+          beforeText,
+          afterText,
+        });
       }
     }
   }
@@ -394,7 +435,7 @@ export function parseSceneText(text: string, filename: string): ParseResult {
 
   const result: ParseResult = { blocks };
   if (filename === "startup") {
-    result.meta = { title, author, variables };
+    result.meta = { title, author, variables, achievements };
   }
 
   return result;

@@ -14,6 +14,12 @@
   color: var(--chrome-text-dim);
 }
 
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .sectionHeader button {
   width: 20px;
   height: 20px;
@@ -107,11 +113,11 @@
 
 .listItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 7px 14px;
   cursor: pointer;
   position: relative;
-  min-height: 34px;
+  min-height: 42px;
   transition: background 0.1s;
   gap: 6px;
 }
@@ -137,19 +143,26 @@
 }
 
 .sceneName {
-  flex: 1;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--chrome-text-sub);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
 }
 
 .sceneFilename {
   font-size: 10px;
   color: var(--chrome-text-dim);
   font-family: monospace;
+  margin-top: 2px;
+}
+
+.sceneText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .itemActions {
@@ -206,4 +219,33 @@
   font-size: 10px;
   color: var(--chrome-text-dim);
   font-family: monospace;
+}
+
+.achievementInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.achievementTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--chrome-text);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.achievementMeta {
+  font-size: 10px;
+  color: var(--chrome-text-dim);
+  font-family: monospace;
+}
+
+.achievementText {
+  font-size: 11px;
+  color: var(--chrome-text-sub);
+  line-height: 1.35;
+  margin-top: 2px;
 }

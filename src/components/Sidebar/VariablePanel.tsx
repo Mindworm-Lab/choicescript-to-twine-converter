@@ -6,6 +6,7 @@ import styles from "./Sidebar.module.css";
 export default function VariablePanel() {
   const { project, addVariable, deleteVariable } = useProjectStore();
   const [adding, setAdding] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [draft, setDraft] = useState<Partial<Variable>>({ type: "number", defaultValue: 0 });
 
   function handleAdd() {
@@ -25,10 +26,15 @@ export default function VariablePanel() {
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <span>Variables</span>
-        <button onClick={() => setAdding(!adding)}>+</button>
+        <div className={styles.sectionActions}>
+          <button onClick={() => setCollapsed(v => !v)} title={collapsed ? "Expand" : "Collapse"}>
+            {collapsed ? "▸" : "▾"}
+          </button>
+          <button onClick={() => setAdding(!adding)} title="Add variable">+</button>
+        </div>
       </div>
 
-      {adding && (
+      {!collapsed && adding && (
         <div className={styles.addForm}>
           <input
             placeholder="variable name"
@@ -63,7 +69,7 @@ export default function VariablePanel() {
         </div>
       )}
 
-      <ul className={styles.list}>
+      {!collapsed && <ul className={styles.list}>
         {project.variables.map(v => (
           <li key={v.id} className={styles.listItem}>
             <div className={styles.varInfo}>
@@ -78,7 +84,7 @@ export default function VariablePanel() {
             </div>
           </li>
         ))}
-      </ul>
+      </ul>}
     </div>
   );
 }

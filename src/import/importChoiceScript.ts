@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { parseSceneText } from "../codegen/parseScene";
-import type { GameProject, Scene, Variable } from "../types";
+import type { Achievement, GameProject, Scene, Variable } from "../types";
 
 interface TextFile {
   name: string;
@@ -14,6 +14,7 @@ export interface ImportChoiceScriptResult {
     sourceTextFileCount: number;
     importedSceneCount: number;
     importedVariableCount: number;
+    importedAchievementCount: number;
     usedSceneList: boolean;
     missingSceneListEntries: number;
     extraSceneFilesAppended: number;
@@ -76,6 +77,19 @@ function cloneVariables(variables: Variable[] | undefined): Variable[] {
     type: v.type,
     defaultValue: v.defaultValue,
     description: v.description ?? "",
+  }));
+}
+
+function cloneAchievements(achievements: Achievement[] | undefined): Achievement[] {
+  if (!achievements) return [];
+  return achievements.map(a => ({
+    id: a.id || nanoid(),
+    key: a.key,
+    visibility: a.visibility,
+    points: a.points,
+    title: a.title,
+    beforeText: a.beforeText,
+    afterText: a.afterText,
   }));
 }
 
@@ -146,6 +160,7 @@ export function importChoiceScriptFromFiles(files: TextFile[]): ImportChoiceScri
     title: startupMeta?.title?.trim() || "Imported ChoiceScript Story",
     author: startupMeta?.author?.trim() || "Unknown",
     variables: cloneVariables(startupMeta?.variables),
+    achievements: cloneAchievements(startupMeta?.achievements),
     scenes,
   };
 
@@ -156,6 +171,7 @@ export function importChoiceScriptFromFiles(files: TextFile[]): ImportChoiceScri
       sourceTextFileCount: txtFiles.length,
       importedSceneCount: scenes.length,
       importedVariableCount: project.variables.length,
+      importedAchievementCount: project.achievements.length,
       usedSceneList: orderedFromSceneList.length > 0,
       missingSceneListEntries,
       extraSceneFilesAppended: orderedFromSceneList.length > 0 ? extraFiles.length : 0,

@@ -6,6 +6,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import TopBar from "./components/TopBar/TopBar";
 import SceneList from "./components/Sidebar/SceneList";
 import VariablePanel from "./components/Sidebar/VariablePanel";
+import AchievementsPanel from "./components/Sidebar/AchievementsPanel";
 import BlockList from "./components/BlockEditor/BlockList";
 import AddBlockMenu from "./components/BlockEditor/AddBlockMenu";
 import CodePreview from "./components/CodePreview/CodePreview";
@@ -65,6 +66,7 @@ export default function App() {
           <aside className={styles.sidebar}>
             <SceneList />
             <VariablePanel />
+            <AchievementsPanel />
           </aside>
           <main className={styles.blockEditor}>
             {activeScene ? (

@@ -7,6 +7,7 @@ export default function SceneList() {
   const [newFilename, setNewFilename] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [adding, setAdding] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   function handleAdd() {
@@ -21,10 +22,15 @@ export default function SceneList() {
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <span>Scenes</span>
-        <button onClick={() => setAdding(!adding)}>+</button>
+        <div className={styles.sectionActions}>
+          <button onClick={() => setCollapsed(v => !v)} title={collapsed ? "Expand" : "Collapse"}>
+            {collapsed ? "▸" : "▾"}
+          </button>
+          <button onClick={() => setAdding(!adding)} title="Add scene">+</button>
+        </div>
       </div>
 
-      {adding && (
+      {!collapsed && adding && (
         <div className={styles.addForm}>
           <input
             placeholder="filename (e.g. chapter1)"
@@ -45,7 +51,7 @@ export default function SceneList() {
         </div>
       )}
 
-      <ul className={styles.list}>
+      {!collapsed && <ul className={styles.list}>
         {project.scenes.map(scene => (
           <li
             key={scene.id}
@@ -73,8 +79,10 @@ export default function SceneList() {
               />
             ) : (
               <>
-                <span className={styles.sceneName}>{scene.title}</span>
-                <span className={styles.sceneFilename}>{scene.filename}.txt</span>
+                <div className={styles.sceneText}>
+                  <span className={styles.sceneName}>{scene.title}</span>
+                  <span className={styles.sceneFilename}>{scene.filename}.txt</span>
+                </div>
               </>
             )}
             <div className={styles.itemActions}>
@@ -93,7 +101,7 @@ export default function SceneList() {
             </div>
           </li>
         ))}
-      </ul>
+      </ul>}
     </div>
   );
 }
