@@ -54,6 +54,43 @@ function stripReusePrefix(trimmed: string): string {
   return trimmed.replace(/^\*(hide_reuse|disable_reuse|allow_reuse)\s+/i, "");
 }
 
+function extractParenthesized(input: string): { content: string; endIndex: number } | null {
+  if (!input.startsWith("(")) return null;
+
+  let depth = 0;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") {
+      depth--;
+      if (depth === 0) {
+        return {
+          content: input.slice(1, i),
+          endIndex: i,
+        };
+      }
+      if (depth < 0) return null;
+    }
+  }
+
+  return null;
+}
+
+function parseIfLikeConditionLine(trimmed: string, keyword: "if" | "elseif"): string | null {
+  const prefix = `*${keyword}`;
+  if (!trimmed.startsWith(prefix)) return null;
+
+  const rest = trimmed.slice(prefix.length).trimStart();
+  const extracted = extractParenthesized(rest);
+  if (!extracted) return null;
+
+  const trailing = rest.slice(extracted.endIndex + 1).trim();
+  if (trailing.length > 0) return null;
+
+  const condition = extracted.content.trim();
+  return condition.length > 0 ? condition : null;
+}
+
 function parseChoiceOptionLine(rawTrimmed: string): {
   text: string;
   visibility: "if" | "selectable_if";
@@ -63,17 +100,31 @@ function parseChoiceOptionLine(rawTrimmed: string): {
 } | null {
   const trimmed = stripReusePrefix(rawTrimmed);
 
-  const condOptMatch = trimmed.match(/^\*(selectable_if|if)\s+\(([^)]+)\)\s+#(.*)$/);
-  if (condOptMatch) {
-    const visibility = condOptMatch[1] === "selectable_if" ? "selectable_if" : "if";
-    const cond = parseConditionArg(condOptMatch[2]);
-    return {
-      text: condOptMatch[3],
-      visibility,
-      conditionMode: cond.conditionMode,
-      conditions: cond.condition ? [cond.condition] : [],
-      conditionRaw: cond.conditionRaw,
-    };
+  const command = trimmed.startsWith("*selectable_if")
+    ? "selectable_if"
+    : trimmed.startsWith("*if")
+      ? "if"
+      : null;
+
+  if (command) {
+    const rest = trimmed.slice(`*${command}`.length).trimStart();
+    const extracted = extractParenthesized(rest);
+    if (extracted) {
+      const trailing = rest.slice(extracted.endIndex + 1).trimStart();
+      if (trailing.startsWith("#")) {
+        const visibility = command === "selectable_if" ? "selectable_if" : "if";
+        const cond = parseConditionArg(extracted.content.trim());
+        return {
+          text: trailing.slice(1),
+          visibility,
+          conditionMode: cond.conditionMode,
+          conditions: cond.condition ? [cond.condition] : [],
+          conditionRaw: cond.conditionRaw,
+        };
+      }
+    }
+
+    return null;
   }
 
   if (trimmed.startsWith("#")) {
@@ -153,9 +204,9 @@ function parseChoiceOptions(cursor: ParseCursor, level: number, inheritedConditi
       continue;
     }
 
-    const ifMatch = trimmed.match(/^\*if\s+\(([^)]+)\)$/);
-    if (ifMatch) {
-      const firstBranchCondition = ifMatch[1].trim();
+    const ifCondition = parseIfLikeConditionLine(trimmed, "if");
+    if (ifCondition) {
+      const firstBranchCondition = ifCondition;
       cursor.pos++;
       options.push(...parseChoiceOptions(cursor, level + 1, combineConditionExpr(inheritedConditionExpr, firstBranchCondition)));
 
@@ -174,10 +225,10 @@ function parseChoiceOptions(cursor: ParseCursor, level: number, inheritedConditi
         }
 
         const branchTrimmed = branchLine.trim();
-        const elseifMatch = branchTrimmed.match(/^\*elseif\s+\(([^)]+)\)$/);
-        if (elseifMatch) {
+        const elseifCondition = parseIfLikeConditionLine(branchTrimmed, "elseif");
+        if (elseifCondition) {
           cursor.pos++;
-          options.push(...parseChoiceOptions(cursor, level + 1, combineConditionExpr(inheritedConditionExpr, elseifMatch[1].trim())));
+          options.push(...parseChoiceOptions(cursor, level + 1, combineConditionExpr(inheritedConditionExpr, elseifCondition)));
           continue;
         }
 
@@ -209,16 +260,16 @@ function parseIfBlock(cursor: ParseCursor, level: number): Block {
     if (indent < level) break;
     const trimmed = line.trim();
 
-    const ifMatch = trimmed.match(/^\*if\s+\(([^)]+)\)/);
-    const elseifMatch = trimmed.match(/^\*elseif\s+\(([^)]+)\)/);
+    const ifCondition = parseIfLikeConditionLine(trimmed, "if");
+    const elseifCondition = parseIfLikeConditionLine(trimmed, "elseif");
 
-    if (branches.length === 0 && ifMatch) {
-      const cond = parseConditionArg(ifMatch[1]);
+    if (branches.length === 0 && ifCondition) {
+      const cond = parseConditionArg(ifCondition);
       cursor.pos++;
       const blocks = parseBlocksAtLevel(cursor, level + 1);
       branches.push({ id: nanoid(), ...cond, blocks });
-    } else if (branches.length > 0 && elseifMatch) {
-      const cond = parseConditionArg(elseifMatch[1]);
+    } else if (branches.length > 0 && elseifCondition) {
+      const cond = parseConditionArg(elseifCondition);
       cursor.pos++;
       const blocks = parseBlocksAtLevel(cursor, level + 1);
       branches.push({ id: nanoid(), ...cond, blocks });
@@ -322,7 +373,7 @@ function parseBlocksAtLevel(cursor: ParseCursor, level: number): Block[] {
       continue;
     }
 
-    if (trimmed.match(/^\*if\s+\(/)) {
+    if (parseIfLikeConditionLine(trimmed, "if")) {
       blocks.push(parseIfBlock(cursor, level));
       continue;
     }
