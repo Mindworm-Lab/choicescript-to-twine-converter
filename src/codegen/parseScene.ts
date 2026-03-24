@@ -10,6 +10,7 @@ function getIndentLevel(line: string): number {
   let spaces = 0;
   for (let i = 0; i < line.length; i++) {
     if (line[i] === " ") spaces++;
+    else if (line[i] === "\t") spaces += 2;
     else break;
   }
   return Math.floor(spaces / 2);
@@ -310,8 +311,12 @@ function parseBlocksAtLevel(cursor: ParseCursor, level: number): Block[] {
 
     // Text paragraph — collect consecutive text lines at same indent
     if (trimmed.startsWith("#")) {
-      // Option marker at wrong level — stop
-      break;
+      // Option marker at wrong level.
+      // Inside nested parsing, return to parent.
+      if (level > 0) break;
+      // At top-level, skip malformed stray option lines and continue parsing rest of file.
+      cursor.pos++;
+      continue;
     }
 
     const textLines: string[] = [];
