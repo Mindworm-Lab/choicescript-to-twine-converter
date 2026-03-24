@@ -85,6 +85,18 @@
   border-color: var(--accent);
 }
 
+.largeSceneNotice {
+  margin: 14px;
+  padding: 14px;
+  border: 1px solid var(--chrome-border2);
+  border-radius: 6px;
+  background: var(--code-surface);
+  color: var(--chrome-text-sub);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .parseError {
   padding: 7px 14px;
   background: #280a0a;

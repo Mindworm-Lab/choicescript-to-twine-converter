@@ -3,10 +3,68 @@ import { useProjectStore } from "../../store/projectStore";
 import { useActiveScene } from "../../store/selectors";
 import { generateScene } from "../../codegen/generateScene";
 import { parseSceneText } from "../../codegen/parseScene";
+import type { Block } from "../../types";
 import GamePreview from "../GamePreview/GamePreview";
 import styles from "./CodePreview.module.css";
 
 type Tab = "code" | "play";
+const LARGE_SCENE_DEFER_THRESHOLD = 240_000;
+
+function estimateSceneTextSize(blocks: Block[]): number {
+  let total = 0;
+
+  function walk(items: Block[]) {
+    for (const block of items) {
+      switch (block.kind) {
+        case "paragraph":
+          total += block.text.length + 2;
+          break;
+        case "image":
+          total += block.src.length + 16;
+          break;
+        case "comment":
+          total += block.text.length + 4;
+          break;
+        case "choice":
+          total += 12;
+          for (const option of block.options) {
+            total += option.text.length + 6;
+            walk(option.blocks);
+          }
+          break;
+        case "if":
+          total += 8;
+          for (const branch of block.branches) {
+            total += branch.conditionRaw.length + 6;
+            walk(branch.blocks);
+          }
+          break;
+        case "set":
+          total += block.variable.length + block.value.length + 12;
+          break;
+        case "label":
+          total += block.name.length + 8;
+          break;
+        case "goto":
+          total += block.label.length + 8;
+          break;
+        case "goto_scene":
+          total += block.sceneName.length + block.label.length + 14;
+          break;
+        case "stat_chart":
+          total += block.entries.length * 18 + 10;
+          break;
+        case "finish":
+        case "ending":
+          total += 8;
+          break;
+      }
+    }
+  }
+
+  walk(blocks);
+  return total;
+}
 
 export default function CodePreview() {
   const [tab, setTab] = useState<Tab>("code");
@@ -32,7 +90,7 @@ export default function CodePreview() {
         </span>
       </div>
       <div className={styles.content}>
-        {tab === "code" ? <CodeEditor /> : <GamePreview />}
+        {tab === "code" ? <CodeEditor key={activeScene?.id ?? "none"} /> : <GamePreview />}
       </div>
     </div>
   );
@@ -43,11 +101,19 @@ function CodeEditor() {
   const activeScene = useActiveScene();
   const replaceSceneBlocks = useProjectStore(s => s.replaceSceneBlocks);
   const replaceProjectMeta = useProjectStore(s => s.replaceProjectMeta);
+  const [forceLoadLargeCode, setForceLoadLargeCode] = useState(false);
+
+  const isLargeScene = useMemo(
+    () => Boolean(activeScene && estimateSceneTextSize(activeScene.blocks) > LARGE_SCENE_DEFER_THRESHOLD),
+    [activeScene],
+  );
+  const deferLargeSceneCode = isLargeScene && !forceLoadLargeCode;
 
   const generatedCode = useMemo(() => {
     if (!activeScene) return "";
+    if (deferLargeSceneCode) return "";
     return generateScene(activeScene, project);
-  }, [activeScene, project]);
+  }, [activeScene, deferLargeSceneCode, project]);
 
   const [localCode, setLocalCode] = useState(generatedCode);
   const [isFocused, setIsFocused] = useState(false);
@@ -159,21 +225,32 @@ function CodeEditor() {
           + Insert Image URL
         </button>
       </div>
-      {parseError && (
-        <div className={styles.parseError}>
-          &#x26A0; Parse error: {parseError}
+      {deferLargeSceneCode ? (
+        <div className={styles.largeSceneNotice}>
+          <div>This scene is very large. Code view is paused to keep the editor responsive.</div>
+          <button className={styles.codeToolBtn} onClick={() => setForceLoadLargeCode(true)}>
+            Load Code Anyway
+          </button>
         </div>
+      ) : (
+        <>
+          {parseError && (
+            <div className={styles.parseError}>
+              &#x26A0; Parse error: {parseError}
+            </div>
+          )}
+          <textarea
+            ref={textareaRef}
+            className={styles.codeTextarea}
+            value={isFocused ? localCode : generatedCode}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            spellCheck={false}
+            placeholder="// Add blocks to see generated code"
+          />
+        </>
       )}
-      <textarea
-        ref={textareaRef}
-        className={styles.codeTextarea}
-        value={isFocused ? localCode : generatedCode}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        spellCheck={false}
-        placeholder="// Add blocks to see generated code"
-      />
     </div>
   );
 }
