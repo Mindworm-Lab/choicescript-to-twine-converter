@@ -1,7 +1,7 @@
 import type { GameData, IRBlock, IRIfBranch, IRChoiceOption, IRStatChartField } from '../types';
 import type { ExportStyle } from '../../types';
 import { DEFAULT_EXPORT_STYLE } from '../../types';
-import { translateExpr, translateText } from './operators';
+import { translateExpr, translateSetExpr, translateText } from './operators';
 import { buildHtml } from './template';
 
 
@@ -80,7 +80,7 @@ function blockToMarkup(block: IRBlock, sceneId: string, game: GameData): string 
       return '<br>';
 
     case 'set': {
-      const rhs = translateExpr(block.expr);
+      const rhs = translateSetExpr(block.name, block.expr);
       if (block.op === '=') {
         return `<<set $${block.name} = ${rhs}>>`;
       } else {

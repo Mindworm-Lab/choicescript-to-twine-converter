@@ -200,6 +200,21 @@ function applySet(
   block: Extract<Block, { kind: "set" }>
 ): Record<string, string | number | boolean> {
   const updated = { ...vars };
+  const fairMathMatch = block.value.trim().match(/^%([+-])\s*(.+)$/);
+  if (block.operator === "=" && fairMathMatch) {
+    const sign = fairMathMatch[1];
+    const percentRaw = fairMathMatch[2];
+    const percent = Number(evalValue(percentRaw, vars)) || 0;
+    const cur = Number(updated[block.variable] ?? 0);
+
+    if (sign === "+") {
+      updated[block.variable] = cur + ((100 - cur) * percent) / 100;
+    } else {
+      updated[block.variable] = cur - (cur * percent) / 100;
+    }
+    return updated;
+  }
+
   const evaluated = evalValue(block.value, vars);
   const cur = updated[block.variable] ?? 0;
   switch (block.operator) {

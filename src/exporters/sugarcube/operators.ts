@@ -35,7 +35,21 @@ export function translateExpr(expr: string): string {
  * variable prefixing is handled by prefixVariables inside translateExpr.
  */
 export function translateSetExpr(_name: string, expr: string): string {
-  return translateExpr(expr);
+  const trimmed = expr.trim();
+  const fairMathMatch = trimmed.match(/^%([+-])\s*(.+)$/);
+
+  if (fairMathMatch) {
+    const sign = fairMathMatch[1];
+    const percentExpr = translateExpr(fairMathMatch[2]);
+    const variable = `$${_name}`;
+
+    if (sign === "+") {
+      return `(${variable} + ((100 - ${variable}) * (${percentExpr}) / 100))`;
+    }
+    return `(${variable} - (${variable} * (${percentExpr}) / 100))`;
+  }
+
+  return translateExpr(trimmed);
 }
 
 function parseMultireplaceBody(body: string): { expr: string; options: string[] } | null {
