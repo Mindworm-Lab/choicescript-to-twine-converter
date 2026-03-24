@@ -3,7 +3,7 @@ import { useProjectStore } from "../../store/projectStore";
 import { useActiveScene } from "../../store/selectors";
 import { generateScene } from "../../codegen/generateScene";
 import { parseSceneText } from "../../codegen/parseScene";
-import type { Block } from "../../types";
+import type { Block, ChoiceOption, IfBranch, Scene, GameProject } from "../../types";
 import GamePreview from "../GamePreview/GamePreview";
 import styles from "./CodePreview.module.css";
 
@@ -87,38 +87,114 @@ function findBlockById(blocks: Block[], targetId: string): Block | null {
   return null;
 }
 
-function candidateAnchors(block: Block): string[] {
+function startupHeaderLineCount(project: GameProject): number {
+  let count = 0;
+  count += 2;
+  count += 1;
+  count += project.variables.length;
+  if (project.variables.length > 0) count += 1;
+  return count;
+}
+
+function mapChoiceOptionLines(option: ChoiceOption, startLine: number, lineMap: Map<string, number>): number {
+  let produced = 1;
+  let line = startLine + 1;
+
+  for (const child of option.blocks) {
+    const childLines = mapBlockLines(child, line, lineMap);
+    line += childLines;
+    produced += childLines;
+  }
+
+  return produced;
+}
+
+function mapIfBranchLines(branch: IfBranch, startLine: number, lineMap: Map<string, number>): number {
+  let produced = 1;
+  let line = startLine + 1;
+
+  for (const child of branch.blocks) {
+    const childLines = mapBlockLines(child, line, lineMap);
+    line += childLines;
+    produced += childLines;
+  }
+
+  return produced;
+}
+
+function mapBlockLines(block: Block, startLine: number, lineMap: Map<string, number>): number {
   switch (block.kind) {
     case "paragraph": {
-      const firstLine = block.text
-        .split("\n")
-        .map(line => line.trim())
-        .find(Boolean);
-      return firstLine ? [firstLine] : [];
+      if (!block.text) return 0;
+      const lines = block.text.split("\n").length;
+      lineMap.set(block.id, startLine);
+      return lines;
     }
     case "image":
-      return [block.align === "none" ? `*image ${block.src}` : `*image ${block.src} ${block.align}`];
-    case "set":
-      return [block.operator === "=" ? `*set ${block.variable} ${block.value}` : `*set ${block.variable} ${block.operator}${block.value}`];
-    case "goto":
-      return [`*goto ${block.label}`];
-    case "goto_scene":
-      return [block.label ? `*goto_scene ${block.sceneName} ${block.label}` : `*goto_scene ${block.sceneName}`];
-    case "label":
-      return [`*label ${block.name}`];
-    case "finish":
-      return ["*finish"];
-    case "ending":
-      return ["*ending"];
     case "comment":
-      return [`* ${block.text}`];
-    case "choice":
-      return ["*choice", "*fake_choice"];
-    case "if":
-      return ["*if (", "*elseif (", "*else"];
-    case "stat_chart":
-      return ["*stat_chart"];
+    case "label":
+    case "goto":
+    case "goto_scene":
+    case "set":
+    case "finish":
+    case "ending":
+      lineMap.set(block.id, startLine);
+      return 1;
+    case "stat_chart": {
+      if (block.entries.length === 0) return 0;
+      lineMap.set(block.id, startLine);
+      return 1 + block.entries.length;
+    }
+    case "choice": {
+      lineMap.set(block.id, startLine);
+      let produced = 1;
+      let line = startLine + 1;
+      for (const option of block.options) {
+        const optionLines = mapChoiceOptionLines(option, line, lineMap);
+        line += optionLines;
+        produced += optionLines;
+      }
+      return produced;
+    }
+    case "if": {
+      lineMap.set(block.id, startLine);
+      let produced = 0;
+      let line = startLine;
+      for (const branch of block.branches) {
+        const branchLines = mapIfBranchLines(branch, line, lineMap);
+        line += branchLines;
+        produced += branchLines;
+      }
+      return produced;
+    }
   }
+}
+
+function buildBlockLineMap(scene: Scene, project: GameProject): Map<string, number> {
+  const lineMap = new Map<string, number>();
+  let lineCursor = 1;
+
+  if (scene.filename === "startup") {
+    lineCursor += startupHeaderLineCount(project);
+  }
+
+  for (const block of scene.blocks) {
+    const produced = mapBlockLines(block, lineCursor, lineMap);
+    lineCursor += produced + 1;
+  }
+
+  return lineMap;
+}
+
+function lineToOffset(text: string, targetLine: number): number {
+  if (targetLine <= 1) return 0;
+  const lines = text.split("\n");
+  const lineCount = Math.min(targetLine - 1, lines.length);
+  let offset = 0;
+  for (let i = 0; i < lineCount; i++) {
+    offset += lines[i].length + 1;
+  }
+  return offset;
 }
 
 export default function CodePreview() {
@@ -187,17 +263,14 @@ function CodeEditor() {
     const block = findBlockById(activeScene.blocks, activeBlockId);
     if (!block) return null;
 
-    const anchors = candidateAnchors(block);
-    for (const anchor of anchors) {
-      if (!anchor) continue;
-      const offset = generatedCode.indexOf(anchor);
-      if (offset !== -1) {
-        const line = generatedCode.slice(0, offset).split("\n").length;
-        return { line, offset, matchedLength: anchor.length };
-      }
-    }
+    const lineMap = buildBlockLineMap(activeScene, project);
+    const line = lineMap.get(activeBlockId);
+    if (!line) return null;
 
-    return null;
+    const lines = generatedCode.split("\n");
+    const offset = lineToOffset(generatedCode, line);
+    const matchedLength = Math.max(1, lines[Math.max(0, line - 1)]?.length ?? 1);
+    return { line, offset, matchedLength };
   })();
 
   const updateSyncIndicator = useCallback((scrollTop: number) => {
