@@ -49,6 +49,45 @@ function parseSetBlock(trimmed: string): Block {
   return { kind: "set", id: nanoid(), variable: varName, operator: "=", value: rhs };
 }
 
+function stripReusePrefix(trimmed: string): string {
+  return trimmed.replace(/^\*(hide_reuse|disable_reuse|allow_reuse)\s+/i, "");
+}
+
+function parseChoiceOptionLine(rawTrimmed: string): {
+  text: string;
+  visibility: "if" | "selectable_if";
+  conditionMode: "simple" | "advanced";
+  conditions: Condition[];
+  conditionRaw: string;
+} | null {
+  const trimmed = stripReusePrefix(rawTrimmed);
+
+  const condOptMatch = trimmed.match(/^\*(selectable_if|if)\s+\(([^)]+)\)\s+#(.*)$/);
+  if (condOptMatch) {
+    const visibility = condOptMatch[1] === "selectable_if" ? "selectable_if" : "if";
+    const cond = parseConditionArg(condOptMatch[2]);
+    return {
+      text: condOptMatch[3],
+      visibility,
+      conditionMode: cond.conditionMode,
+      conditions: cond.condition ? [cond.condition] : [],
+      conditionRaw: cond.conditionRaw,
+    };
+  }
+
+  if (trimmed.startsWith("#")) {
+    return {
+      text: trimmed.slice(1),
+      visibility: "if",
+      conditionMode: "simple",
+      conditions: [],
+      conditionRaw: "",
+    };
+  }
+
+  return null;
+}
+
 function parseChoiceOptions(cursor: ParseCursor, level: number): ChoiceOption[] {
   const options: ChoiceOption[] = [];
 
@@ -59,39 +98,17 @@ function parseChoiceOptions(cursor: ParseCursor, level: number): ChoiceOption[] 
     if (indent < level) break;
     const trimmed = line.trim();
 
-    // *selectable_if (cond) #text  or  *if (cond) #text
-    const condOptMatch = trimmed.match(/^\*(selectable_if|if)\s+\(([^)]+)\)\s+#(.*)$/);
-    if (condOptMatch) {
-      const visibility = condOptMatch[1] === "selectable_if" ? "selectable_if" : "if";
-      const condStr = condOptMatch[2];
-      const text = condOptMatch[3];
-      cursor.pos++;
-      const blocks = parseBlocksAtLevel(cursor, level + 1);
-      const cond = parseConditionArg(condStr);
-      options.push({
-        id: nanoid(),
-        text,
-        conditionMode: cond.conditionMode,
-        conditions: cond.condition ? [cond.condition] : [],
-        conditionRaw: cond.conditionRaw,
-        visibility,
-        blocks,
-      });
-      continue;
-    }
-
-    // Plain #text
-    if (trimmed.startsWith("#")) {
-      const text = trimmed.slice(1);
+    const parsedOption = parseChoiceOptionLine(trimmed);
+    if (parsedOption) {
       cursor.pos++;
       const blocks = parseBlocksAtLevel(cursor, level + 1);
       options.push({
         id: nanoid(),
-        text,
-        conditionMode: "simple",
-        conditions: [],
-        conditionRaw: "",
-        visibility: "if",
+        text: parsedOption.text,
+        conditionMode: parsedOption.conditionMode,
+        conditions: parsedOption.conditions,
+        conditionRaw: parsedOption.conditionRaw,
+        visibility: parsedOption.visibility,
         blocks,
       });
       continue;
@@ -178,7 +195,7 @@ function parseBlocksAtLevel(cursor: ParseCursor, level: number): Block[] {
       continue;
     }
 
-    if (trimmed.startsWith("*choice")) {
+    if (trimmed.startsWith("*choice") || trimmed.startsWith("*fake_choice")) {
       cursor.pos++;
       const options = parseChoiceOptions(cursor, level + 1);
       blocks.push({ kind: "choice", id: nanoid(), options });
