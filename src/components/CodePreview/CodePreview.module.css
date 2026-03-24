@@ -113,6 +113,40 @@
   flex-shrink: 0;
 }
 
+.codeSurface {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.syncedLineBand {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+  z-index: 1;
+}
+
+.syncedMarker {
+  position: absolute;
+  left: 0;
+  width: 10px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+  z-index: 2;
+}
+
 .codeTextarea {
   flex: 1;
   width: 100%;

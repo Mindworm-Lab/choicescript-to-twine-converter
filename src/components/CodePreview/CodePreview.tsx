@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useProjectStore } from "../../store/projectStore";
 import { useActiveScene } from "../../store/selectors";
 import { generateScene } from "../../codegen/generateScene";
@@ -9,6 +9,8 @@ import styles from "./CodePreview.module.css";
 
 type Tab = "code" | "play";
 const LARGE_SCENE_DEFER_THRESHOLD = 240_000;
+const CODE_LINE_HEIGHT = 20;
+const CODE_PADDING_TOP = 16;
 
 function estimateSceneTextSize(blocks: Block[]): number {
   let total = 0;
@@ -174,6 +176,8 @@ function CodeEditor() {
   const [parseError, setParseError] = useState<string | null>(null);
   const parseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const syncedMarkerRef = useRef<HTMLDivElement>(null);
+  const syncedLineBandRef = useRef<HTMLDivElement>(null);
 
   const syncMatch = (() => {
     if (deferLargeSceneCode || !activeScene || !activeBlockId || !generatedCode || isFocused) {
@@ -196,6 +200,26 @@ function CodeEditor() {
     return null;
   })();
 
+  const updateSyncIndicator = useCallback((scrollTop: number) => {
+    const marker = syncedMarkerRef.current;
+    const band = syncedLineBandRef.current;
+    const textarea = textareaRef.current;
+
+    if (!marker || !band || !textarea || !syncMatch) {
+      if (marker) marker.style.opacity = "0";
+      if (band) band.style.opacity = "0";
+      return;
+    }
+
+    const lineTop = CODE_PADDING_TOP + (syncMatch.line - 1) * CODE_LINE_HEIGHT - scrollTop;
+    const visible = lineTop > -CODE_LINE_HEIGHT && lineTop < textarea.clientHeight;
+
+    marker.style.opacity = visible ? "1" : "0";
+    band.style.opacity = visible ? "1" : "0";
+    marker.style.transform = `translateY(${lineTop}px)`;
+    band.style.transform = `translateY(${lineTop}px)`;
+  }, [syncMatch]);
+
   useEffect(
     () => () => {
       if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
@@ -211,10 +235,20 @@ function CodeEditor() {
     textarea.setSelectionRange(syncMatch.offset, syncMatch.offset + Math.max(1, syncMatch.matchedLength));
 
     const textBefore = generatedCode.slice(0, syncMatch.offset);
-    const lineHeight = 19;
     const targetLineIndex = Math.max(0, textBefore.split("\n").length - 1);
-    textarea.scrollTop = Math.max(0, targetLineIndex * lineHeight - textarea.clientHeight * 0.35);
-  }, [generatedCode, syncMatch]);
+    textarea.scrollTop = Math.max(0, targetLineIndex * CODE_LINE_HEIGHT - textarea.clientHeight * 0.35);
+    updateSyncIndicator(textarea.scrollTop);
+  }, [generatedCode, syncMatch, updateSyncIndicator]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    updateSyncIndicator(textarea.scrollTop);
+  }, [syncMatch, updateSyncIndicator]);
+
+  function handleCodeScroll(e: React.UIEvent<HTMLTextAreaElement>) {
+    updateSyncIndicator(e.currentTarget.scrollTop);
+  }
 
   function scheduleParseAndUpdate(text: string) {
     if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
@@ -328,16 +362,21 @@ function CodeEditor() {
               &#x26A0; Parse error: {parseError}
             </div>
           )}
-          <textarea
-            ref={textareaRef}
-            className={styles.codeTextarea}
-            value={isFocused ? localCode : generatedCode}
-            onChange={handleChange}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            spellCheck={false}
-            placeholder="// Add blocks to see generated code"
-          />
+          <div className={styles.codeSurface}>
+            <div ref={syncedLineBandRef} className={styles.syncedLineBand} aria-hidden="true" />
+            <div ref={syncedMarkerRef} className={styles.syncedMarker} aria-hidden="true" />
+            <textarea
+              ref={textareaRef}
+              className={styles.codeTextarea}
+              value={isFocused ? localCode : generatedCode}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onScroll={handleCodeScroll}
+              spellCheck={false}
+              placeholder="// Add blocks to see generated code"
+            />
+          </div>
         </>
       )}
     </div>
