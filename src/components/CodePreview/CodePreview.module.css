@@ -123,6 +123,7 @@
 
 .syncedLineBand {
   position: absolute;
+  top: 0;
   left: 0;
   right: 0;
   height: 20px;
@@ -137,6 +138,7 @@
 
 .syncedMarker {
   position: absolute;
+  top: 0;
   left: 0;
   width: 10px;
   height: 20px;
