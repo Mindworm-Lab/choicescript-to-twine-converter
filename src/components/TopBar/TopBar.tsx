@@ -34,6 +34,20 @@ interface FilePickerWindow extends Window {
   }) => Promise<FileHandleLike[]>;
 }
 
+async function pickExistingJsonFile(win: FilePickerWindow): Promise<FileHandleLike | null> {
+  if (!win.showOpenFilePicker) return null;
+  try {
+    const [handle] = await win.showOpenFilePicker({
+      multiple: false,
+      types: [{ description: "Story Project JSON", accept: { "application/json": [".json"] } }],
+    });
+    return handle ?? null;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") return null;
+    throw error;
+  }
+}
+
 function slug(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "project";
 }
@@ -116,15 +130,27 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
     const pickerWindow = window as FilePickerWindow;
 
     try {
+      let handle = activeHandleRef.current;
+
+      if (!saveAs && !handle) {
+        handle = await pickExistingJsonFile(pickerWindow);
+        if (handle) activeHandleRef.current = handle;
+      }
+
+      if (!saveAs && handle) {
+        const writable = await handle.createWritable();
+        await writable.write(snapshotPretty);
+        await writable.close();
+        markSaved(snapshot, handle.name);
+        return;
+      }
+
       if (pickerWindow.showSaveFilePicker) {
-        let handle = activeHandleRef.current;
-        if (saveAs || !handle) {
-          handle = await pickerWindow.showSaveFilePicker({
+        handle = await pickerWindow.showSaveFilePicker({
             suggestedName: currentFileName || suggestedProjectFileName(project),
             types: [{ description: "Story Project JSON", accept: { "application/json": [".json"] } }],
-          });
-          activeHandleRef.current = handle;
-        }
+        });
+        activeHandleRef.current = handle;
 
         const writable = await handle.createWritable();
         await writable.write(snapshotPretty);
@@ -159,17 +185,14 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
     const pickerWindow = window as FilePickerWindow;
     if (pickerWindow.showOpenFilePicker) {
       try {
-        const [handle] = await pickerWindow.showOpenFilePicker({
-          multiple: false,
-          types: [{ description: "Story Project JSON", accept: { "application/json": [".json"] } }],
-        });
+        const handle = await pickExistingJsonFile(pickerWindow);
         if (!handle) return;
         const file = await handle.getFile();
         const text = await file.text();
         loadFromText(text, handle.name, handle);
         return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
+      } catch {
+        alert("Open failed in linked-file mode. Falling back to import mode.");
       }
     }
 
