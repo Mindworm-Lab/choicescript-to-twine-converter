@@ -58,6 +58,33 @@
   overflow: hidden;
 }
 
+.codeTools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 6px 12px;
+  background: var(--code-surface);
+  border-bottom: 1px solid var(--code-border);
+  flex-shrink: 0;
+}
+
+.codeToolBtn {
+  border: 1px solid var(--chrome-border2);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--chrome-text-sub);
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.codeToolBtn:hover {
+  background: var(--chrome-hover);
+  color: var(--chrome-text);
+  border-color: var(--accent);
+}
+
 .parseError {
   padding: 7px 14px;
   background: #280a0a;

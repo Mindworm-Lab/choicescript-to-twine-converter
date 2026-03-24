@@ -53,6 +53,7 @@ function CodeEditor() {
   const [isFocused, setIsFocused] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const parseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(
     () => () => {
@@ -114,14 +115,57 @@ function CodeEditor() {
     }
   }
 
+  function insertImageFromUrl() {
+    const rawUrl = window.prompt("Image URL", "https://picsum.photos/seed/story/900/500");
+    const url = rawUrl?.trim();
+    if (!url) return;
+
+    const rawAlign = window.prompt("Alignment (left, center, right, none)", "center");
+    const normalizedAlign = (rawAlign ?? "center").trim().toLowerCase();
+    const align = ["left", "center", "right", "none"].includes(normalizedAlign)
+      ? normalizedAlign
+      : "center";
+
+    const command = align === "none" ? `*image ${url}` : `*image ${url} ${align}`;
+    const baseText = isFocused ? localCode : generatedCode;
+
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? baseText.length;
+    const end = textarea?.selectionEnd ?? baseText.length;
+
+    const before = baseText.slice(0, start);
+    const after = baseText.slice(end);
+    const needsLeadingNewline = before.length > 0 && !before.endsWith("\n");
+    const needsTrailingNewline = after.length > 0 && !after.startsWith("\n");
+
+    const insertion = `${needsLeadingNewline ? "\n" : ""}${command}${needsTrailingNewline ? "\n" : ""}`;
+    const nextText = `${before}${insertion}${after}`;
+
+    setIsFocused(true);
+    setLocalCode(nextText);
+    scheduleParseAndUpdate(nextText);
+
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      const nextPos = before.length + insertion.length;
+      textarea?.setSelectionRange(nextPos, nextPos);
+    });
+  }
+
   return (
     <div className={styles.codeEditorWrap}>
+      <div className={styles.codeTools}>
+        <button className={styles.codeToolBtn} onClick={insertImageFromUrl}>
+          + Insert Image URL
+        </button>
+      </div>
       {parseError && (
         <div className={styles.parseError}>
           &#x26A0; Parse error: {parseError}
         </div>
       )}
       <textarea
+        ref={textareaRef}
         className={styles.codeTextarea}
         value={isFocused ? localCode : generatedCode}
         onChange={handleChange}
