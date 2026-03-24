@@ -10,6 +10,14 @@ interface TextFile {
 export interface ImportChoiceScriptResult {
   project: GameProject;
   warnings: string[];
+  report: {
+    sourceTextFileCount: number;
+    importedSceneCount: number;
+    importedVariableCount: number;
+    usedSceneList: boolean;
+    missingSceneListEntries: number;
+    extraSceneFilesAppended: number;
+  };
 }
 
 function normalizeSceneName(fileName: string): string {
@@ -90,6 +98,7 @@ export function importChoiceScriptFromFiles(files: TextFile[]): ImportChoiceScri
   const startupParsed = parseSceneText(startupFile.text, "startup");
   const startupMeta = startupParsed.meta;
   const orderedFromSceneList = parseSceneList(startupFile.text).map(s => s.toLowerCase());
+  let missingSceneListEntries = 0;
 
   const availableScenes = [...byScene.keys()].filter(name => name !== "startup").sort((a, b) => a.localeCompare(b));
   const orderedSceneNames = dedupe([
@@ -100,6 +109,7 @@ export function importChoiceScriptFromFiles(files: TextFile[]): ImportChoiceScri
 
   for (const sceneName of orderedFromSceneList) {
     if (!byScene.has(sceneName)) {
+      missingSceneListEntries++;
       warnings.push(`Scene listed in *scene_list not found: ${sceneName}.txt`);
     }
   }
@@ -138,5 +148,16 @@ export function importChoiceScriptFromFiles(files: TextFile[]): ImportChoiceScri
     scenes,
   };
 
-  return { project, warnings };
+  return {
+    project,
+    warnings,
+    report: {
+      sourceTextFileCount: txtFiles.length,
+      importedSceneCount: scenes.length,
+      importedVariableCount: project.variables.length,
+      usedSceneList: orderedFromSceneList.length > 0,
+      missingSceneListEntries,
+      extraSceneFilesAppended: orderedFromSceneList.length > 0 ? extraFiles.length : 0,
+    },
+  };
 }

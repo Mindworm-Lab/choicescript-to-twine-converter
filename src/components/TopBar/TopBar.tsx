@@ -85,6 +85,39 @@ function formatSavedAt(value: number | null): string {
   return `Saved ${new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+function buildImportReportText(input: {
+  fileCount: number;
+  sceneCount: number;
+  variableCount: number;
+  usedSceneList: boolean;
+  missingSceneListEntries: number;
+  extraSceneFilesAppended: number;
+  warnings: string[];
+}): string {
+  const lines = [
+    "ChoiceScript import complete",
+    "",
+    `Text files scanned: ${input.fileCount}`,
+    `Scenes imported: ${input.sceneCount}`,
+    `Variables imported: ${input.variableCount}`,
+    `*scene_list detected: ${input.usedSceneList ? "yes" : "no"}`,
+  ];
+
+  if (input.usedSceneList) {
+    lines.push(`Missing scene_list files: ${input.missingSceneListEntries}`);
+    lines.push(`Extra scene files appended: ${input.extraSceneFilesAppended}`);
+  }
+
+  if (input.warnings.length > 0) {
+    lines.push("", "Warnings:");
+    for (const warning of input.warnings) {
+      lines.push(`- ${warning}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
 export default function TopBar({ viewMode, onSetView }: TopBarProps) {
   const { project, setProjectMeta, loadProject, undo, redo } = useProjectStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -238,7 +271,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
         files.push({ name: entry.name, text: await file.text() });
       }
 
-      const { project: imported, warnings } = importChoiceScriptFromFiles(files);
+      const { project: imported, warnings, report } = importChoiceScriptFromFiles(files);
       loadProject(imported);
       activeHandleRef.current = null;
       lastSavedSnapshotRef.current = JSON.stringify(imported);
@@ -246,9 +279,15 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
       setLastSavedAt(Date.now());
       setIsDirty(false);
 
-      if (warnings.length > 0) {
-        alert(`Imported with warnings:\n${warnings.join("\n")}`);
-      }
+      alert(buildImportReportText({
+        fileCount: report.sourceTextFileCount,
+        sceneCount: report.importedSceneCount,
+        variableCount: report.importedVariableCount,
+        usedSceneList: report.usedSceneList,
+        missingSceneListEntries: report.missingSceneListEntries,
+        extraSceneFilesAppended: report.extraSceneFilesAppended,
+        warnings,
+      }));
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       alert("Could not import ChoiceScript folder. Make sure it contains startup.txt and scene .txt files.");
