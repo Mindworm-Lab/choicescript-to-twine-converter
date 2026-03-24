@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProjectStore } from "./store/projectStore";
 import { useActiveScene } from "./store/selectors";
 import { useAutoSave, loadAutosave } from "./hooks/useAutoSave";
@@ -16,14 +16,29 @@ import styles from "./App.module.css";
 export default function App() {
   const loadProject = useProjectStore(s => s.loadProject);
   const activeScene = useActiveScene();
-  const [autosavePrompt, setAutosavePrompt] = useState(() => Boolean(loadAutosave()));
+  const [autosavePrompt, setAutosavePrompt] = useState(false);
   const [viewMode, setViewMode] = useState<"editor" | "flowchart" | "style">("editor");
 
   useAutoSave();
   useKeyboardShortcuts();
 
-  function handleRestoreAutosave() {
-    const saved = loadAutosave();
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      const saved = await loadAutosave();
+      if (!cancelled && saved) {
+        setAutosavePrompt(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleRestoreAutosave() {
+    const saved = await loadAutosave();
     if (saved) loadProject(saved);
     setAutosavePrompt(false);
   }
@@ -33,7 +48,7 @@ export default function App() {
       {autosavePrompt && (
         <div className={styles.autosaveBar}>
           Autosaved project found.{" "}
-          <button onClick={handleRestoreAutosave}>Restore</button>{" "}
+          <button onClick={() => void handleRestoreAutosave()}>Restore</button>{" "}
           <button onClick={() => setAutosavePrompt(false)}>Dismiss</button>
         </div>
       )}
