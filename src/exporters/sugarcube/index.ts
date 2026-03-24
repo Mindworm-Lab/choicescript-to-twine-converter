@@ -287,16 +287,23 @@ function renderOptionAsLink(opt: IRChoiceOption, sceneId: string, game: GameData
   const destination = findDestination(body, sceneId);
   const actionBlocks = body.filter(b => b.kind !== 'goto_scene' && b.kind !== 'goto' && b.kind !== 'ending');
   const actions = blocksToMarkup(actionBlocks, sceneId, game);
-
-  let inner = '';
-  if (actions.trim()) inner = actions + '\n';
-  if (destination) inner += `<<goto "${destination}">>`;
-  if (!destination && body.some(b => b.kind === 'ending')) {
-    inner += `<p class="cs-ending">The End</p>`;
-  }
+  const hasActionBody = actions.trim().length > 0;
 
   const linkText = text.replace(/"/g, '\\"');
-  const link = `<<link "${linkText}">>\n${inner}\n<</link>>`;
+  let link = '';
+
+  if (destination && !hasActionBody) {
+    const linkDest = destination.replace(/"/g, '\\"');
+    link = `<<link "${linkText}" "${linkDest}">><</link>>`;
+  } else {
+    let inner = '';
+    if (hasActionBody) inner = actions + '\n';
+    if (destination) inner += `<<goto "${destination}">>`;
+    if (body.some(b => b.kind === 'ending')) {
+      inner += `<p class="cs-ending">The End</p>`;
+    }
+    link = `<<link "${linkText}">>\n${inner}\n<</link>>`;
+  }
 
   if (opt.condition && opt.conditionType === 'selectable') {
     return `<<if ${translateExpr(opt.condition)}>>${link}<<else>><span class="cs-disabled">${text}</span><</if>>`;
