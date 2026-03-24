@@ -177,6 +177,47 @@ function parseBlocksAtLevel(cursor: ParseCursor, level: number): Block[] {
       continue;
     }
 
+    if (trimmed === "*scene_list" || trimmed.startsWith("*scene_list ")) {
+      const sceneListIndent = indent;
+      cursor.pos++;
+      while (cursor.pos < cursor.lines.length) {
+        const sceneLine = cursor.lines[cursor.pos];
+        const sceneTrimmed = sceneLine.trim();
+
+        if (!sceneTrimmed) {
+          cursor.pos++;
+          continue;
+        }
+
+        const sceneIndent = getIndentLevel(sceneLine);
+        if (sceneIndent <= sceneListIndent) break;
+        cursor.pos++;
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith("*achievement ")) {
+      const achievementIndent = indent;
+      cursor.pos++;
+
+      while (cursor.pos < cursor.lines.length) {
+        const descLine = cursor.lines[cursor.pos];
+        const descTrimmed = descLine.trim();
+
+        if (!descTrimmed) {
+          cursor.pos++;
+          continue;
+        }
+
+        const descIndent = getIndentLevel(descLine);
+        if (descIndent <= achievementIndent) break;
+        if (descTrimmed.startsWith("*") || descTrimmed.startsWith("#")) break;
+
+        cursor.pos++;
+      }
+      continue;
+    }
+
     if (trimmed === "*stat_chart") {
       cursor.pos++;
       const entries: import("../types").StatChartEntry[] = [];
@@ -308,25 +349,28 @@ export function parseSceneText(text: string, filename: string): ParseResult {
   let title: string | undefined;
   let author: string | undefined;
   const variables: Variable[] = [];
+  const seenVariables = new Set<string>();
 
-  // For startup scene, extract meta from the beginning
+  // For startup scene, extract meta from all lines.
+  // Some projects place *scene_list before the bulk of *create commands.
   if (filename === "startup") {
-    while (cursor.pos < cursor.lines.length) {
-      const line = cursor.lines[cursor.pos].trim();
-      if (!line) { cursor.pos++; continue; }
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) continue;
 
       const titleMatch = line.match(/^\*title\s+(.+)$/);
       const authorMatch = line.match(/^\*author\s+(.+)$/);
       const createMatch = line.match(/^\*create\s+(\w+)\s+(.*)$/);
 
-      if (titleMatch) {
+      if (!title && titleMatch) {
         title = titleMatch[1].trim();
-        cursor.pos++;
-      } else if (authorMatch) {
+      } else if (!author && authorMatch) {
         author = authorMatch[1].trim();
-        cursor.pos++;
       } else if (createMatch) {
         const name = createMatch[1];
+        const normalizedName = name.toLowerCase();
+        if (seenVariables.has(normalizedName)) continue;
+
         const rawVal = createMatch[2].trim();
         let type: Variable["type"] = "number";
         let defaultValue: string | number | boolean = 0;
@@ -341,9 +385,7 @@ export function parseSceneText(text: string, filename: string): ParseResult {
           defaultValue = rawVal.replace(/^"|"$/g, "");
         }
         variables.push({ id: nanoid(), name, type, defaultValue, description: "" });
-        cursor.pos++;
-      } else {
-        break;
+        seenVariables.add(normalizedName);
       }
     }
   }

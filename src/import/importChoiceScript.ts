@@ -49,9 +49,10 @@ function parseSceneList(startupText: string): string[] {
 
       const indent = nextRaw.length - nextRaw.trimStart().length;
       if (indent <= baseIndent) break;
-      if (nextTrimmed.startsWith("*")) continue;
+      if (nextTrimmed.startsWith("*") || nextTrimmed.startsWith("$") || nextTrimmed.startsWith("//")) continue;
 
       const sceneName = nextTrimmed.split(/\s+/)[0]?.trim();
+      if (!sceneName || !/^[a-z0-9_-]+$/i.test(sceneName)) continue;
       if (sceneName && !result.includes(sceneName)) {
         result.push(sceneName);
       }
