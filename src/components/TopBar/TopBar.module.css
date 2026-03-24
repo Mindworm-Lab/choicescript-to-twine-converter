@@ -165,3 +165,39 @@
   border-color: var(--chrome-border2);
   color: var(--chrome-text);
 }
+
+.menuWrap {
+  position: relative;
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 190px;
+  background: var(--chrome-surface);
+  border: 1px solid var(--chrome-border2);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  z-index: 50;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menuDropdown button {
+  border: none;
+  background: transparent;
+  color: var(--chrome-text-sub);
+  font-size: 11px;
+  text-align: left;
+  padding: 7px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.menuDropdown button:hover {
+  background: var(--chrome-hover);
+  color: var(--chrome-text);
+}

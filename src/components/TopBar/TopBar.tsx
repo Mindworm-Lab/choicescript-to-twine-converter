@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useProjectStore } from "../../store/projectStore";
 import { exportProject } from "../../export/exportProject";
 import { exportTwine } from "../../export/exportTwine";
+import { importChoiceScriptFromFiles } from "../../import/importChoiceScript";
 import type { GameProject } from "../../types";
 import styles from "./TopBar.module.css";
 
@@ -23,6 +24,16 @@ interface FileHandleLike {
   getFile: () => Promise<File>;
 }
 
+interface DirectoryEntryLike {
+  kind: "file" | "directory";
+  name: string;
+  getFile?: () => Promise<File>;
+}
+
+interface DirectoryHandleLike {
+  values: () => AsyncIterable<DirectoryEntryLike>;
+}
+
 interface FilePickerWindow extends Window {
   showSaveFilePicker?: (options?: {
     suggestedName?: string;
@@ -32,6 +43,7 @@ interface FilePickerWindow extends Window {
     multiple?: boolean;
     types?: Array<{ description: string; accept: Record<string, string[]> }>;
   }) => Promise<FileHandleLike[]>;
+  showDirectoryPicker?: () => Promise<DirectoryHandleLike>;
 }
 
 async function pickExistingJsonFile(win: FilePickerWindow): Promise<FileHandleLike | null> {
@@ -76,9 +88,13 @@ function formatSavedAt(value: number | null): string {
 export default function TopBar({ viewMode, onSetView }: TopBarProps) {
   const { project, setProjectMeta, loadProject, undo, redo } = useProjectStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const openMenuRef = useRef<HTMLDivElement>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   const [currentFileName, setCurrentFileName] = useState(suggestedProjectFileName(project));
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [openMenuOpen, setOpenMenuOpen] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const activeHandleRef = useRef<FileHandleLike | null>(null);
   const lastSavedSnapshotRef = useRef<string>(JSON.stringify(project));
 
@@ -91,6 +107,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
   }, [project]);
 
   function handleExport() {
+    setExportMenuOpen(false);
     exportProject(project).then(warnings => {
       if (warnings.length > 0) {
         alert("Warnings:\n" + warnings.join("\n"));
@@ -99,6 +116,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
   }
 
   function handleExportTwine() {
+    setExportMenuOpen(false);
     const warnings = exportTwine(project);
     if (warnings.length > 0) {
       alert("Warnings:\n" + warnings.join("\n"));
@@ -182,6 +200,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
   }
 
   async function handleOpenProject() {
+    setOpenMenuOpen(false);
     const pickerWindow = window as FilePickerWindow;
     if (pickerWindow.showOpenFilePicker) {
       try {
@@ -197,6 +216,43 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
     }
 
     fileInputRef.current?.click();
+  }
+
+  async function handleImportChoiceScriptFolder() {
+    setOpenMenuOpen(false);
+    const pickerWindow = window as FilePickerWindow;
+
+    if (!pickerWindow.showDirectoryPicker) {
+      alert("Folder import is not supported in this browser context. Use Open JSON instead.");
+      return;
+    }
+
+    try {
+      const dirHandle = await pickerWindow.showDirectoryPicker();
+      const files: Array<{ name: string; text: string }> = [];
+      for await (const entry of dirHandle.values()) {
+        if (entry.kind !== "file") continue;
+        if (!entry.name.toLowerCase().endsWith(".txt")) continue;
+        if (!entry.getFile) continue;
+        const file = await entry.getFile();
+        files.push({ name: entry.name, text: await file.text() });
+      }
+
+      const { project: imported, warnings } = importChoiceScriptFromFiles(files);
+      loadProject(imported);
+      activeHandleRef.current = null;
+      lastSavedSnapshotRef.current = JSON.stringify(imported);
+      setCurrentFileName(suggestedProjectFileName(imported));
+      setLastSavedAt(Date.now());
+      setIsDirty(false);
+
+      if (warnings.length > 0) {
+        alert(`Imported with warnings:\n${warnings.join("\n")}`);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      alert("Could not import ChoiceScript folder. Make sure it contains startup.txt and scene .txt files.");
+    }
   }
 
   function handleLoadJsonFallback(e: React.ChangeEvent<HTMLInputElement>) {
@@ -224,6 +280,21 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [saveProject]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (openMenuRef.current && !openMenuRef.current.contains(target)) {
+        setOpenMenuOpen(false);
+      }
+      if (exportMenuRef.current && !exportMenuRef.current.contains(target)) {
+        setExportMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className={styles.topBar}>
@@ -274,11 +345,40 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
         <div className={styles.btnGroup}>
           <button className={styles.btn} onClick={() => void saveProject(false)} title="Save project (Ctrl+S)">↓ Save</button>
           <button className={styles.btn} onClick={() => void saveProject(true)} title="Save to a new file">⇣ Save As</button>
-          <button className={styles.btn} onClick={() => void handleOpenProject()} title="Open project JSON">↑ Open</button>
+          <div className={styles.menuWrap} ref={openMenuRef}>
+            <button
+              className={styles.btn}
+              onClick={() => {
+                setOpenMenuOpen(v => !v);
+                setExportMenuOpen(false);
+              }}
+              title="Open/import"
+            >↑ Open ▾</button>
+            {openMenuOpen && (
+              <div className={styles.menuDropdown}>
+                <button onClick={() => void handleOpenProject()}>Open JSON</button>
+                <button onClick={() => void handleImportChoiceScriptFolder()}>Import ChoiceScript Folder</button>
+              </div>
+            )}
+          </div>
         </div>
         <div className={styles.btnGroup}>
-          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleExport} title="Export .zip">⬡ Export</button>
-          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleExportTwine} title="Export as Twine HTML">⬡ Twine</button>
+          <div className={styles.menuWrap} ref={exportMenuRef}>
+            <button
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              onClick={() => {
+                setExportMenuOpen(v => !v);
+                setOpenMenuOpen(false);
+              }}
+              title="Export"
+            >⬡ Export ▾</button>
+            {exportMenuOpen && (
+              <div className={styles.menuDropdown}>
+                <button onClick={handleExport}>ChoiceScript ZIP</button>
+                <button onClick={handleExportTwine}>Twine HTML</button>
+              </div>
+            )}
+          </div>
         </div>
         <input ref={fileInputRef} type="file" accept=".json" style={{ display: "none" }} onChange={handleLoadJsonFallback} />
       </div>
