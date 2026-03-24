@@ -4,6 +4,13 @@ A visual editor for building choose-your-own-adventure stories and exporting the
 
 This project combines a block-based narrative editor, a scene flowchart view, and live code/game preview to help you author branching fiction without hand-writing every macro.
 
+<img width="1186" height="770" alt="image" src="https://github.com/user-attachments/assets/82a7fa93-1767-4256-b2b7-f650633a6ab1" />
+
+<img width="1805" height="859" alt="image" src="https://github.com/user-attachments/assets/b4e255b4-4e3c-4a57-89f2-d1a00110fd3e" />
+
+<img width="1244" height="770" alt="image" src="https://github.com/user-attachments/assets/872abc0e-8d07-4d75-b8a0-841f8a13b040" />
+
+
 ## Features
 
 - Block editor with story, branching, and logic blocks (paragraphs, choices, `if/else`, variable `set`, labels, goto, scene jumps, endings)
