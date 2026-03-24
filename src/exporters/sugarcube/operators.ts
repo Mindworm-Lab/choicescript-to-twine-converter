@@ -89,5 +89,14 @@ export function translateText(text: string): string {
   // 3. ${var} — plain variable interpolation
   result = result.replace(/\$\{(\w+)\}/g, (_, v: string) => `<<print $${v}>>`);
 
+  // 4. ChoiceScript inline formatting tags
+  result = result
+    .replace(/\[b\]/gi, '<strong>')
+    .replace(/\[\/b\]/gi, '</strong>')
+    .replace(/\[i\]/gi, '<em>')
+    .replace(/\[\/i\]/gi, '</em>')
+    .replace(/\[u\]/gi, '<u>')
+    .replace(/\[\/u\]/gi, '</u>');
+
   return result;
 }

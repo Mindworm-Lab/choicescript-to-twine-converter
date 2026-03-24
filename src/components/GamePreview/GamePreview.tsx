@@ -130,6 +130,27 @@ function interpolate(
   );
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderChoiceScriptInlineMarkup(text: string, vars: Record<string, string | number | boolean>): string {
+  let html = escapeHtml(interpolate(text, vars));
+  html = html
+    .replace(/\[b\]/gi, "<strong>")
+    .replace(/\[\/b\]/gi, "</strong>")
+    .replace(/\[i\]/gi, "<em>")
+    .replace(/\[\/i\]/gi, "</em>")
+    .replace(/\[u\]/gi, "<u>")
+    .replace(/\[\/u\]/gi, "</u>");
+  return html;
+}
+
 function initFromProject(project: GameProject): GameState {
   const vars: Record<string, string | number | boolean> = {};
   for (const v of project.variables) {
@@ -462,7 +483,11 @@ export default function GamePreview({ exportStyle, showSidebar = false }: GamePr
           }
           return (
             <p key={item.id} className={styles.paragraph}>
-              {interpolate(item.text ?? "", state.variables)}
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: renderChoiceScriptInlineMarkup(item.text ?? "", state.variables),
+                }}
+              />
             </p>
           );
         })}
@@ -478,7 +503,11 @@ export default function GamePreview({ exportStyle, showSidebar = false }: GamePr
                   onClick={() => opt.selectable && handleChoice(opt.optionBlocks)}
                   disabled={!opt.selectable}
                 >
-                  {interpolate(opt.text, state.variables)}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: renderChoiceScriptInlineMarkup(opt.text, state.variables),
+                    }}
+                  />
                 </button>
               ))}
           </div>

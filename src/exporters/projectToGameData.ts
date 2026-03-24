@@ -35,6 +35,8 @@ export function projectToGameData(project: GameProject): GameData {
     }
   }
 
+  sanitizeGotoTargets(passages, startPassage);
+
   return {
     id: slugify(project.title),
     title: project.title || 'Untitled',
@@ -61,7 +63,7 @@ function buildPassages(scene: Scene): Passage[] {
   for (const block of scene.blocks) {
     if (block.kind === 'label') {
       // Flush current passage
-      if (currentBlocks.length > 0 || passages.length === 0) {
+      if (currentBlocks.length > 0 || passages.length === 0 || currentLabel !== undefined) {
         passages.push({ id: currentId, sceneId: scene.filename, label: currentLabel, blocks: currentBlocks });
       }
       currentLabel = block.name;
@@ -326,4 +328,39 @@ function hoistTailIntoChoices(blocks: IRBlock[]): IRBlock[] {
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'untitled';
+}
+
+function sanitizeGotoTargets(passages: Passage[], defaultPassage: string): void {
+  const valid = new Set(passages.map(p => p.id));
+  const sceneRoots = new Map<string, string>();
+
+  for (const passage of passages) {
+    if (!sceneRoots.has(passage.sceneId)) {
+      sceneRoots.set(passage.sceneId, passage.id);
+    }
+  }
+
+  function visit(blocks: IRBlock[], sceneId: string): void {
+    for (const block of blocks) {
+      if (block.kind === 'goto') {
+        if (!valid.has(block.passageId)) {
+          block.passageId = sceneRoots.get(sceneId) ?? defaultPassage;
+        }
+        continue;
+      }
+
+      if (block.kind === 'if') {
+        for (const branch of block.branches) visit(branch.blocks, sceneId);
+        continue;
+      }
+
+      if (block.kind === 'choice') {
+        for (const option of block.options) visit(option.blocks, sceneId);
+      }
+    }
+  }
+
+  for (const passage of passages) {
+    visit(passage.blocks, passage.sceneId);
+  }
 }
