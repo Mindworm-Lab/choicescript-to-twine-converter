@@ -9,8 +9,15 @@ import styles from "./CodePreview.module.css";
 
 type Tab = "code" | "play";
 const LARGE_SCENE_DEFER_THRESHOLD = 240_000;
-const CODE_LINE_HEIGHT = 20;
-const CODE_PADDING_TOP = 16;
+
+function getTextareaMetrics(textarea: HTMLTextAreaElement): { lineHeight: number; paddingTop: number } {
+  const styles = window.getComputedStyle(textarea);
+  const fontSize = Number.parseFloat(styles.fontSize) || 12;
+  const lineHeightRaw = Number.parseFloat(styles.lineHeight);
+  const lineHeight = Number.isFinite(lineHeightRaw) ? lineHeightRaw : fontSize * 1.65;
+  const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
+  return { lineHeight, paddingTop };
+}
 
 function estimateSceneTextSize(blocks: Block[]): number {
   let total = 0;
@@ -284,8 +291,12 @@ function CodeEditor() {
       return;
     }
 
-    const lineTop = CODE_PADDING_TOP + (syncMatch.line - 1) * CODE_LINE_HEIGHT - scrollTop;
-    const visible = lineTop > -CODE_LINE_HEIGHT && lineTop < textarea.clientHeight;
+    const { lineHeight, paddingTop } = getTextareaMetrics(textarea);
+    const lineTop = paddingTop + (syncMatch.line - 1) * lineHeight - scrollTop;
+    const visible = lineTop > -lineHeight && lineTop < textarea.clientHeight;
+
+    marker.style.height = `${lineHeight}px`;
+    band.style.height = `${lineHeight}px`;
 
     marker.style.opacity = visible ? "1" : "0";
     band.style.opacity = visible ? "1" : "0";
@@ -307,9 +318,9 @@ function CodeEditor() {
 
     textarea.setSelectionRange(syncMatch.offset, syncMatch.offset + Math.max(1, syncMatch.matchedLength));
 
-    const textBefore = generatedCode.slice(0, syncMatch.offset);
-    const targetLineIndex = Math.max(0, textBefore.split("\n").length - 1);
-    textarea.scrollTop = Math.max(0, targetLineIndex * CODE_LINE_HEIGHT - textarea.clientHeight * 0.35);
+    const { lineHeight } = getTextareaMetrics(textarea);
+    const targetLineIndex = Math.max(0, syncMatch.line - 1);
+    textarea.scrollTop = Math.max(0, targetLineIndex * lineHeight - textarea.clientHeight * 0.35);
     updateSyncIndicator(textarea.scrollTop);
   }, [generatedCode, syncMatch, updateSyncIndicator]);
 
