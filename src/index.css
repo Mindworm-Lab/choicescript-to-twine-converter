@@ -1,0 +1,74 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body { margin: 0; padding: 0; overflow: hidden; }
+
+:root {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+
+  /* Surfaces */
+  --chrome-bg:        #12141f;
+  --chrome-surface:   #1a1d2e;
+  --chrome-raised:    #1e2236;
+  --chrome-hover:     #252840;
+  --chrome-active:    #2d3155;
+  --chrome-border:    #2a2e45;
+  --chrome-border2:   #363b58;
+
+  /* Chrome text */
+  --chrome-text:      #c8cce8;
+  --chrome-text-sub:  #7b82a8;
+  --chrome-text-dim:  #454b68;
+
+  /* Editor (dark — matches IDE aesthetic) */
+  --editor-bg:        #0e1017;
+  --editor-surface:   #141720;
+  --editor-raised:    #191c28;
+  --editor-hover:     #1c1f2e;
+  --editor-border:    #21253a;
+  --editor-text:      #c4c8e2;
+  --editor-text-sub:  #6c7499;
+  --editor-text-dim:  #3c4260;
+
+  /* Code panel */
+  --code-bg:          #0d0e17;
+  --code-surface:     #141520;
+  --code-border:      #1e2236;
+  --code-text:        #c9d1e9;
+  --code-text-dim:    #454b68;
+
+  /* Accent */
+  --accent:           #7c6cf4;
+  --accent-hover:     #9182f7;
+  --accent-dim:       #2a2650;
+
+  /* Semantic */
+  --success:          #4fc87a;
+  --warning:          #e8a838;
+  --danger:           #e86060;
+  --info:             #4da3e0;
+
+  /* Block kind accents */
+  --kind-paragraph:   #4fc87a;
+  --kind-choice:      #4da3e0;
+  --kind-if:          #e8a838;
+  --kind-set:         #a47ef5;
+  --kind-label:       #55c9e0;
+  --kind-goto:        #e86060;
+  --kind-goto-scene:  #e87540;
+  --kind-finish:      #79c0ff;
+  --kind-ending:      #ff9580;
+  --kind-comment:     #6b7299;
+  --kind-stat-chart:  #f472b6;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--chrome-border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--chrome-text-dim); }
+
+/* Input/select base resets */
+input, select, textarea, button {
+  font-family: inherit;
+}

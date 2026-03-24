@@ -1,0 +1,1937 @@
+{
+  "id": "my-homestead-life-v1",
+  "title": "My Homestead Life",
+  "author": "Demo",
+  "variables": [
+    {"id": "v_money", "name": "money", "type": "number", "defaultValue": 500, "description": "Cash savings in the tin on the shelf"},
+    {"id": "v_energy", "name": "energy", "type": "number", "defaultValue": 10, "description": "Daily action points"},
+    {"id": "v_max_energy", "name": "max_energy", "type": "number", "defaultValue": 10, "description": "Maximum energy (rises in summer, falls in winter)"},
+    {"id": "v_food_supply", "name": "food_supply", "type": "number", "defaultValue": 20, "description": "Stored food units in the larder"},
+    {"id": "v_day", "name": "day", "type": "number", "defaultValue": 1, "description": "Current day of the year (1-363)"},
+    {"id": "v_season", "name": "season", "type": "string", "defaultValue": "spring", "description": "Current season: spring, summer, fall, or winter"},
+    {"id": "v_year", "name": "year", "type": "number", "defaultValue": 1, "description": "Current year on the homestead"},
+    {"id": "v_garden_plots", "name": "garden_plots", "type": "number", "defaultValue": 2, "description": "Number of cultivated garden plot spaces"},
+    {"id": "v_crops_planted", "name": "crops_planted", "type": "number", "defaultValue": 0, "description": "Plots currently with growing crops"},
+    {"id": "v_crops_ready", "name": "crops_ready", "type": "number", "defaultValue": 0, "description": "Plots with harvestable crops"},
+    {"id": "v_garden_health", "name": "garden_health", "type": "number", "defaultValue": 50, "description": "Soil quality 0-100, affects harvest yield"},
+    {"id": "v_days_since_planting", "name": "days_since_planting", "type": "number", "defaultValue": 0, "description": "Days elapsed since last planting"},
+    {"id": "v_chickens", "name": "chickens", "type": "number", "defaultValue": 0, "description": "Number of laying hens"},
+    {"id": "v_goats", "name": "goats", "type": "number", "defaultValue": 0, "description": "Number of dairy goats"},
+    {"id": "v_rabbits", "name": "rabbits", "type": "number", "defaultValue": 0, "description": "Number of meat rabbits"},
+    {"id": "v_eggs", "name": "eggs", "type": "number", "defaultValue": 0, "description": "Collected eggs (can be sold)"},
+    {"id": "v_has_tool_shed", "name": "has_tool_shed", "type": "boolean", "defaultValue": false, "description": "Tool shed built — prerequisite for all structures"},
+    {"id": "v_has_barn", "name": "has_barn", "type": "boolean", "defaultValue": false, "description": "Barn built — required for goats, part of win condition"},
+    {"id": "v_has_chicken_coop", "name": "has_chicken_coop", "type": "boolean", "defaultValue": false, "description": "Chicken coop built — required to own hens"},
+    {"id": "v_has_root_cellar", "name": "has_root_cellar", "type": "boolean", "defaultValue": false, "description": "Root cellar built — reduces winter food drain"},
+    {"id": "v_has_greenhouse", "name": "has_greenhouse", "type": "boolean", "defaultValue": false, "description": "Greenhouse built — enables winter planting"},
+    {"id": "v_has_smokehouse", "name": "has_smokehouse", "type": "boolean", "defaultValue": false, "description": "Smokehouse built — improves rabbit meat yield"},
+    {"id": "v_farming_skill", "name": "farming_skill", "type": "number", "defaultValue": 1, "description": "Farming skill 1-5, scales crop yields"},
+    {"id": "v_animal_skill", "name": "animal_skill", "type": "number", "defaultValue": 1, "description": "Animal husbandry skill 1-5"},
+    {"id": "v_building_skill", "name": "building_skill", "type": "number", "defaultValue": 1, "description": "Construction skill 1-5, speeds building progress"},
+    {"id": "v_days_until_market", "name": "days_until_market", "type": "number", "defaultValue": 7, "description": "Days remaining until weekly market day"},
+    {"id": "v_market_day", "name": "market_day", "type": "boolean", "defaultValue": false, "description": "True when the Hollow Creek market is open"},
+    {"id": "v_win_condition_met", "name": "win_condition_met", "type": "boolean", "defaultValue": false, "description": "Set true when self-sufficiency is achieved"},
+    {"id": "v_harvests_done", "name": "harvests_done", "type": "number", "defaultValue": 0, "description": "Total harvests completed (tracks farming skill gains)"},
+    {"id": "v_forage_roll", "name": "forage_roll", "type": "number", "defaultValue": 0, "description": "Pseudo-random forage result (day mod 5)"},
+    {"id": "v_has_seeds", "name": "has_seeds", "type": "boolean", "defaultValue": true, "description": "Whether seeds are available to plant"},
+    {"id": "v_sell_amount", "name": "sell_amount", "type": "number", "defaultValue": 0, "description": "Temp variable: food units being sold at market"},
+    {"id": "v_shed_prog", "name": "shed_prog", "type": "number", "defaultValue": 0, "description": "Tool shed construction progress 0-100"},
+    {"id": "v_coop_prog", "name": "coop_prog", "type": "number", "defaultValue": 0, "description": "Chicken coop construction progress 0-100"},
+    {"id": "v_barn_prog", "name": "barn_prog", "type": "number", "defaultValue": 0, "description": "Barn construction progress 0-100"},
+    {"id": "v_cellar_prog", "name": "cellar_prog", "type": "number", "defaultValue": 0, "description": "Root cellar construction progress 0-100"},
+    {"id": "v_greenhouse_prog", "name": "greenhouse_prog", "type": "number", "defaultValue": 0, "description": "Greenhouse construction progress 0-100"},
+    {"id": "v_smoke_prog", "name": "smoke_prog", "type": "number", "defaultValue": 0, "description": "Smokehouse construction progress 0-100"}
+  ],
+  "scenes": [
+    {
+      "id": "sc_startup",
+      "filename": "startup",
+      "title": "Arriving at Hollow Creek",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_strt_intro",
+          "text": "The truck shudders to a stop at the end of a dirt lane. You step out into the morning air and stand there, keys in hand, looking at what you have done.\n\nFive acres of Hollow Creek land stretches before you — some overgrown meadow, some scraggly second-growth woods, and tucked near a small stream, a weathered farmhouse that is now, improbably, yours. You left a city job, a city apartment, and most of what you owned. What you brought: $500 in cash, a beat-up toolbox, two packets of vegetable seeds, and an idea that you want to feed yourself from your own land.\n\nYou give yourself two years to prove it possible."
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_strt_survey",
+          "text": "You spend the first morning walking the property. The farmhouse roof is solid. Behind the house, two raised beds — rough timber frames filled with decent soil — are the previous owner's parting gift. Near the tree line, you can see wild blackberries. Off the lane, a flat clearing looks like it was once a barn site. You pull out a worn notebook and start making a list."
+        },
+        {
+          "kind": "choice",
+          "id": "b_strt_choice",
+          "options": [
+            {
+              "id": "opt_strt_food",
+              "text": "\"Feed myself reliably before anything else.\" You flip to a new page and start sketching a planting calendar.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_strt_food_para", "text": "Your list fills quickly with crop rotations, soil amendments, and companion planting notes. The others can wait — get the food right first."},
+                {"kind": "set", "id": "b_strt_food_skill", "variable": "farming_skill", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_strt_food_supply", "variable": "food_supply", "operator": "+=", "value": "10"}
+              ]
+            },
+            {
+              "id": "opt_strt_animals",
+              "text": "\"Animals make it feel like a real homestead.\" You jot down notes on livestock housing.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_strt_ani_para", "text": "You've always felt more comfortable around animals than people, if you're honest. The land needs that energy. You also manage to find a neighbor selling off some old gear for cheap, pocketing a bit of extra cash."},
+                {"kind": "set", "id": "b_strt_ani_skill", "variable": "animal_skill", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_strt_ani_money", "variable": "money", "operator": "+=", "value": "50"}
+              ]
+            },
+            {
+              "id": "opt_strt_build",
+              "text": "\"Infrastructure first. You can't do anything properly without solid structures.\" You start a materials list.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_strt_build_para", "text": "You've always believed in the foundation. A proper tool shed, a solid barn — those aren't luxuries, they're multipliers for everything else. The neighbor down the lane buys your old city gear for good money."},
+                {"kind": "set", "id": "b_strt_build_skill", "variable": "building_skill", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_strt_build_money", "variable": "money", "operator": "+=", "value": "100"}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_strt_close",
+          "text": "Spring is the right time to arrive. The soil is ready, the days are getting longer, and the hard season is still months away. You have enough to begin.\n\nThe question is what you will do with it."
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_strt_goto_hub",
+          "sceneName": "homestead_hub",
+          "label": ""
+        }
+      ]
+    },
+
+    {
+      "id": "sc_homestead_hub",
+      "filename": "homestead_hub",
+      "title": "Morning on the Homestead",
+      "blocks": [
+        {
+          "kind": "label",
+          "id": "b_hub_lbl_top",
+          "name": "hub_choice"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_hub_status",
+          "text": "Day ${day} — ${season}, Year ${year}. You stand on the porch with your coffee. You have ${energy} energy today. The larder holds ${food_supply} food. There is $${money} in the tin."
+        },
+        {
+          "kind": "stat_chart",
+          "id": "b_hub_stats",
+          "title": "Homestead Status",
+          "entries": [
+            {"id": "sce_hub_energy", "display": "text", "variable": "energy", "label": "Energy"},
+            {"id": "sce_hub_maxenergy", "display": "text", "variable": "max_energy", "label": "Max Energy"},
+            {"id": "sce_hub_food", "display": "text", "variable": "food_supply", "label": "Food Supply"},
+            {"id": "sce_hub_money", "display": "text", "variable": "money", "label": "Money ($)"},
+            {"id": "sce_hub_garden", "display": "percent", "variable": "garden_health", "label": "Garden Health"},
+            {"id": "sce_hub_farm", "display": "text", "variable": "farming_skill", "label": "Farming Skill"},
+            {"id": "sce_hub_animal", "display": "text", "variable": "animal_skill", "label": "Animal Skill"},
+            {"id": "sce_hub_build", "display": "text", "variable": "building_skill", "label": "Building Skill"}
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_hub_choice",
+          "options": [
+            {
+              "id": "opt_hub_garden",
+              "text": "Tend the garden.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_hub_garden_goto", "sceneName": "garden", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_hub_animals",
+              "text": "See to the animals. (${chickens} hens, ${goats} goats, ${rabbits} rabbits)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "chickens > 0 or goats > 0 or rabbits > 0",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_hub_animals_goto", "sceneName": "animals", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_hub_building",
+              "text": "Work on a construction project.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_hub_building_goto", "sceneName": "building", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_hub_foraging",
+              "text": "Head into the woods to forage. (2 energy)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "energy", "operator": ">=", "value": "2"}],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_hub_forage_goto", "sceneName": "foraging", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_hub_market",
+              "text": "Go to the Hollow Creek market. (Market day!)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "market_day", "operator": "=", "value": "true"}],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_hub_market_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_hub_end_day",
+              "text": "Call it a day. Rest up for tomorrow.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "set", "id": "b_hub_ed_feed", "variable": "food_supply", "operator": "-=", "value": "(chickens + goats + rabbits)"},
+                {
+                  "kind": "if",
+                  "id": "b_hub_ed_food_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_ed_food_low",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "food_supply", "operator": "<", "value": "0"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_hub_ed_food_clamp", "variable": "food_supply", "operator": "=", "value": "0"},
+                        {"kind": "paragraph", "id": "b_hub_ed_food_warn", "text": "Your animals had nothing to eat today — the larder is empty. This cannot go on."}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_ed_food_ok",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {"kind": "set", "id": "b_hub_ed_mkt_dec", "variable": "days_until_market", "operator": "-=", "value": "1"},
+                {
+                  "kind": "if",
+                  "id": "b_hub_ed_mkt_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_mkt_open",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "days_until_market", "operator": "<=", "value": "0"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_hub_mkt_open_set", "variable": "market_day", "operator": "=", "value": "true"},
+                        {"kind": "set", "id": "b_hub_mkt_reset", "variable": "days_until_market", "operator": "=", "value": "7"},
+                        {"kind": "paragraph", "id": "b_hub_mkt_para", "text": "Tomorrow is market day at Hollow Creek."}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_mkt_close",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_hub_mkt_close_set", "variable": "market_day", "operator": "=", "value": "false"}
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hub_ed_crop_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_crop_grow",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "crops_planted", "operator": ">", "value": "0"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_hub_dsp_inc", "variable": "days_since_planting", "operator": "+=", "value": "1"},
+                        {
+                          "kind": "if",
+                          "id": "b_hub_crop_ready_check",
+                          "branches": [
+                            {
+                              "id": "br_hub_crop_ready",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "days_since_planting", "operator": ">=", "value": "7"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_hub_crop_ready_set", "variable": "crops_ready", "operator": "=", "value": "crops_planted"},
+                                {"kind": "set", "id": "b_hub_crop_planted_zero", "variable": "crops_planted", "operator": "=", "value": "0"},
+                                {"kind": "set", "id": "b_hub_dsp_zero", "variable": "days_since_planting", "operator": "=", "value": "0"},
+                                {"kind": "paragraph", "id": "b_hub_crop_ready_para", "text": "Your crops are ready to harvest! Head to the garden when you can."}
+                              ]
+                            },
+                            {
+                              "id": "br_hub_crop_not_ready",
+                              "conditionMode": "simple",
+                              "condition": null,
+                              "conditionRaw": "",
+                              "blocks": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_hub_no_crop",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {"kind": "set", "id": "b_hub_day_inc", "variable": "day", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_hub_energy_reset", "variable": "energy", "operator": "=", "value": "max_energy"},
+                {
+                  "kind": "if",
+                  "id": "b_hub_win_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_win",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "day", "operator": ">", "value": "0"},
+                      "conditionRaw": "food_supply > 50 and money > 200 and has_barn",
+                      "blocks": [
+                        {"kind": "set", "id": "b_hub_win_set", "variable": "win_condition_met", "operator": "=", "value": "true"},
+                        {"kind": "goto_scene", "id": "b_hub_win_goto", "sceneName": "year_end", "label": ""}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_no_win",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hub_yr_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_yr_end",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "day", "operator": ">=", "value": "364"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "goto_scene", "id": "b_hub_yr_goto", "sceneName": "year_end", "label": ""}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_yr_no",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hub_winter_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_to_winter",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "day", "operator": ">", "value": "0"},
+                      "conditionRaw": "day >= 271 and season = \"fall\"",
+                      "blocks": [
+                        {"kind": "goto_scene", "id": "b_hub_winter_goto", "sceneName": "season_change", "label": ""}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_no_winter",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hub_fall_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_to_fall",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "day", "operator": ">", "value": "0"},
+                      "conditionRaw": "day >= 181 and season = \"summer\"",
+                      "blocks": [
+                        {"kind": "goto_scene", "id": "b_hub_fall_goto", "sceneName": "season_change", "label": ""}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_no_fall",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hub_summer_check",
+                  "branches": [
+                    {
+                      "id": "br_hub_to_summer",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "day", "operator": ">", "value": "0"},
+                      "conditionRaw": "day >= 91 and season = \"spring\"",
+                      "blocks": [
+                        {"kind": "goto_scene", "id": "b_hub_summer_goto", "sceneName": "season_change", "label": ""}
+                      ]
+                    },
+                    {
+                      "id": "br_hub_no_summer",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {"kind": "goto", "id": "b_hub_loop", "label": "hub_choice"}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "sc_garden",
+      "filename": "garden",
+      "title": "The Garden",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_grd_intro",
+          "text": "You walk the short path to the garden beds behind the house. The soil smells alive. ${garden_plots} plots stretch before you."
+        },
+        {
+          "kind": "if",
+          "id": "b_grd_status_ready",
+          "branches": [
+            {
+              "id": "br_grd_crops_ready",
+              "conditionMode": "simple",
+              "condition": {"variable": "crops_ready", "operator": ">", "value": "0"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_grd_ready_para", "text": "${crops_ready} plot(s) are heavy with ripe vegetables, their leaves turning gold. Time to harvest."}
+              ]
+            },
+            {
+              "id": "br_grd_crops_growing",
+              "conditionMode": "simple",
+              "condition": {"variable": "crops_planted", "operator": ">", "value": "0"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_grd_growing_para", "text": "Seedlings are pushing up through the soil — ${days_since_planting} days along. Not ready yet, but looking healthy."}
+              ]
+            },
+            {
+              "id": "br_grd_empty",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_grd_empty_para", "text": "The beds are empty and waiting. Good soil, ready to work."}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_grd_choice",
+          "options": [
+            {
+              "id": "opt_grd_plant",
+              "text": "Plant seeds in the empty plots. (2 energy)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "crops_planted = 0 and has_seeds and energy >= 2 and season != \"winter\"",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_grd_plant_set", "variable": "crops_planted", "operator": "=", "value": "garden_plots"},
+                {"kind": "set", "id": "b_grd_plant_dsp", "variable": "days_since_planting", "operator": "=", "value": "0"},
+                {"kind": "set", "id": "b_grd_plant_seeds", "variable": "has_seeds", "operator": "=", "value": "false"},
+                {"kind": "set", "id": "b_grd_plant_energy", "variable": "energy", "operator": "-=", "value": "2"},
+                {"kind": "paragraph", "id": "b_grd_plant_para", "text": "You work through the morning pressing seeds into the earth, drawing furrows with your finger, patting soil over each one. Done. Now you wait seven days."},
+                {"kind": "goto_scene", "id": "b_grd_plant_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_grd_plant_winter",
+              "text": "Plant in the greenhouse (winter growing). (2 energy)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "crops_planted = 0 and has_seeds and energy >= 2 and season = \"winter\" and has_greenhouse",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_grd_plantwi_set", "variable": "crops_planted", "operator": "=", "value": "garden_plots"},
+                {"kind": "set", "id": "b_grd_plantwi_dsp", "variable": "days_since_planting", "operator": "=", "value": "0"},
+                {"kind": "set", "id": "b_grd_plantwi_seeds", "variable": "has_seeds", "operator": "=", "value": "false"},
+                {"kind": "set", "id": "b_grd_plantwi_energy", "variable": "energy", "operator": "-=", "value": "2"},
+                {"kind": "paragraph", "id": "b_grd_plantwi_para", "text": "The greenhouse is warm and damp. You plant in the raised beds inside, grateful for this shelter from the winter. Seeds go in the soil."},
+                {"kind": "goto_scene", "id": "b_grd_plantwi_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_grd_tend",
+              "text": "Tend and amend the soil. (2 energy)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "energy", "operator": ">=", "value": "2"}],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_grd_tend_health", "variable": "garden_health", "operator": "+=", "value": "(farming_skill * 3)"},
+                {
+                  "kind": "if",
+                  "id": "b_grd_tend_cap",
+                  "branches": [
+                    {
+                      "id": "br_grd_health_cap",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "garden_health", "operator": ">", "value": "100"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_grd_health_cap_set", "variable": "garden_health", "operator": "=", "value": "100"}
+                      ]
+                    },
+                    {"id": "br_grd_health_nocap", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                  ]
+                },
+                {"kind": "set", "id": "b_grd_tend_energy", "variable": "energy", "operator": "-=", "value": "2"},
+                {"kind": "paragraph", "id": "b_grd_tend_para", "text": "An hour of weeding, composting, and soil turning. The beds look better for it. Garden health: ${garden_health}."},
+                {"kind": "goto_scene", "id": "b_grd_tend_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_grd_harvest",
+              "text": "Harvest the ready crops. (1 energy)",
+              "conditionMode": "simple",
+              "conditions": [
+                {"variable": "crops_ready", "operator": ">", "value": "0"},
+                {"variable": "energy", "operator": ">=", "value": "1"}
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_grd_harv_food", "variable": "food_supply", "operator": "+=", "value": "(crops_ready * farming_skill * 5)"},
+                {"kind": "set", "id": "b_grd_harv_done", "variable": "harvests_done", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_grd_harv_ready_zero", "variable": "crops_ready", "operator": "=", "value": "0"},
+                {"kind": "set", "id": "b_grd_harv_energy", "variable": "energy", "operator": "-=", "value": "1"},
+                {"kind": "paragraph", "id": "b_grd_harv_para", "text": "You fill baskets with tomatoes, beans, squash, and greens. More than you expected. The food supply grows."},
+                {
+                  "kind": "if",
+                  "id": "b_grd_harv_skillup_check",
+                  "branches": [
+                    {
+                      "id": "br_grd_skillup",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "farming_skill", "operator": "<", "value": "5"},
+                      "conditionRaw": "harvests_done % 3 = 0 and harvests_done > 0 and farming_skill < 5",
+                      "blocks": [
+                        {"kind": "set", "id": "b_grd_skillup_set", "variable": "farming_skill", "operator": "+=", "value": "1"},
+                        {"kind": "paragraph", "id": "b_grd_skillup_para", "text": "You pause with the full baskets and realize how much you have learned. Your hands know this work better now. Farming skill up!"}
+                      ]
+                    },
+                    {"id": "br_grd_no_skillup", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_grd_harv_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_grd_expand",
+              "text": "Break new ground — add a garden plot. (3 energy, $30)",
+              "conditionMode": "simple",
+              "conditions": [
+                {"variable": "energy", "operator": ">=", "value": "3"},
+                {"variable": "money", "operator": ">=", "value": "30"}
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_grd_expand_cap_check",
+                  "branches": [
+                    {
+                      "id": "br_grd_expand_ok",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "garden_plots", "operator": "<", "value": "6"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_grd_expand_plots", "variable": "garden_plots", "operator": "+=", "value": "1"},
+                        {"kind": "set", "id": "b_grd_expand_money", "variable": "money", "operator": "-=", "value": "30"},
+                        {"kind": "set", "id": "b_grd_expand_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "paragraph", "id": "b_grd_expand_para", "text": "Sweat stings your eyes by the time the new bed is framed and filled. Tomorrow it will be ready to plant. You now have ${garden_plots} plots."}
+                      ]
+                    },
+                    {
+                      "id": "br_grd_expand_full",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_grd_expand_full_para", "text": "The garden is already as large as it can comfortably be — six plots is plenty for this land."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_grd_expand_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_grd_back",
+              "text": "That is enough for today. Head back to the house.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_grd_back_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "sc_animals",
+      "filename": "animals",
+      "title": "The Animals",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_ani_intro",
+          "text": "The animals have their routines, and after a while you develop yours alongside them. Morning care is its own kind of meditation."
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_ani_status",
+          "text": "You have ${chickens} hens, ${goats} goats, and ${rabbits} rabbits."
+        },
+        {
+          "kind": "if",
+          "id": "b_ani_chicken_check",
+          "branches": [
+            {
+              "id": "br_ani_chicken_coop",
+              "conditionMode": "advanced",
+              "condition": {"variable": "chickens", "operator": ">", "value": "0"},
+              "conditionRaw": "chickens > 0 and has_chicken_coop",
+              "blocks": [
+                {"kind": "set", "id": "b_ani_egg_collect", "variable": "food_supply", "operator": "+=", "value": "chickens"},
+                {"kind": "set", "id": "b_ani_egg_track", "variable": "eggs", "operator": "+=", "value": "chickens"},
+                {"kind": "set", "id": "b_ani_chicken_energy", "variable": "energy", "operator": "-=", "value": "1"},
+                {"kind": "paragraph", "id": "b_ani_eggs_para", "text": "You work through the nesting boxes, collecting warm eggs into a basket. ${chickens} hens delivered. Added to the larder."}
+              ]
+            },
+            {
+              "id": "br_ani_chicken_nocoop",
+              "conditionMode": "simple",
+              "condition": {"variable": "chickens", "operator": ">", "value": "0"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_ani_nocoop_para", "text": "Your hens are roosting in the old lean-to. You collect what eggs you can find, but without a proper coop, they range too widely. Build a chicken coop to improve egg collection."}
+              ]
+            },
+            {
+              "id": "br_ani_no_chicken",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_ani_goat_check",
+          "branches": [
+            {
+              "id": "br_ani_goat_barn",
+              "conditionMode": "advanced",
+              "condition": {"variable": "goats", "operator": ">", "value": "0"},
+              "conditionRaw": "goats > 0 and has_barn",
+              "blocks": [
+                {"kind": "set", "id": "b_ani_milk_collect", "variable": "food_supply", "operator": "+=", "value": "(goats * 2)"},
+                {"kind": "set", "id": "b_ani_goat_energy", "variable": "energy", "operator": "-=", "value": "1"},
+                {"kind": "paragraph", "id": "b_ani_milk_para", "text": "The goats are patient this morning, and milking goes smoothly. Each goat gives two units of milk. You carry the pails to the kitchen."}
+              ]
+            },
+            {
+              "id": "br_ani_goat_nobarn",
+              "conditionMode": "simple",
+              "condition": {"variable": "goats", "operator": ">", "value": "0"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_ani_goat_nobarn_para", "text": "The goats need a proper barn for efficient milking. Their milk production is poor without it."}
+              ]
+            },
+            {
+              "id": "br_ani_no_goat",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_ani_rabbit_check",
+          "branches": [
+            {
+              "id": "br_ani_has_rabbit",
+              "conditionMode": "simple",
+              "condition": {"variable": "rabbits", "operator": ">", "value": "0"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_ani_rabbit_para", "text": "The rabbits are active in their hutch. You check their water and drop in some greens."},
+                {
+                  "kind": "choice",
+                  "id": "b_ani_rabbit_choice",
+                  "options": [
+                    {
+                      "id": "opt_ani_rabbit_harvest",
+                      "text": "Process one rabbit for meat. (adds ${has_smokehouse} ? 8 : 5 food)",
+                      "conditionMode": "simple",
+                      "conditions": [{"variable": "rabbits", "operator": ">", "value": "1"}],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {"kind": "set", "id": "b_ani_rabbit_dec", "variable": "rabbits", "operator": "-=", "value": "1"},
+                        {"kind": "set", "id": "b_ani_rabbit_energy", "variable": "energy", "operator": "-=", "value": "1"},
+                        {
+                          "kind": "if",
+                          "id": "b_ani_rabbit_smokehouse",
+                          "branches": [
+                            {
+                              "id": "br_ani_rabbit_smoke",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "has_smokehouse", "operator": "=", "value": "true"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_ani_rabbit_smoke_food", "variable": "food_supply", "operator": "+=", "value": "8"},
+                                {"kind": "paragraph", "id": "b_ani_rabbit_smoke_para", "text": "The smokehouse does its work well. Eight units of preserved meat go into the larder."}
+                              ]
+                            },
+                            {
+                              "id": "br_ani_rabbit_nosmoke",
+                              "conditionMode": "simple",
+                              "condition": null,
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_ani_rabbit_nosmoke_food", "variable": "food_supply", "operator": "+=", "value": "5"},
+                                {"kind": "paragraph", "id": "b_ani_rabbit_nosmoke_para", "text": "A practical task. Five units of fresh meat go into the kitchen. A smokehouse would extend the yield."}
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_ani_rabbit_leave",
+                      "text": "Leave them be — let the colony grow.",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_ani_rabbit_leave_para", "text": "You top off the water and move on. The colony will grow stronger."}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "br_ani_no_rabbit",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_ani_skillup_check",
+          "branches": [
+            {
+              "id": "br_ani_skillup",
+              "conditionMode": "advanced",
+              "condition": {"variable": "animal_skill", "operator": "<", "value": "5"},
+              "conditionRaw": "animal_skill < 5 and (chickens + goats + rabbits) >= 5",
+              "blocks": [
+                {"kind": "set", "id": "b_ani_skillup_set", "variable": "animal_skill", "operator": "+=", "value": "1"},
+                {"kind": "paragraph", "id": "b_ani_skillup_para", "text": "Managing this many animals has taught you things no book could. Your confidence in the barn grows. Animal skill up!"}
+              ]
+            },
+            {"id": "br_ani_no_skillup", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_ani_choice",
+          "options": [
+            {
+              "id": "opt_ani_water",
+              "text": "Refresh the water for all animals. (1 energy)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "energy", "operator": ">=", "value": "1"}],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_ani_water_energy", "variable": "energy", "operator": "-=", "value": "1"},
+                {"kind": "paragraph", "id": "b_ani_water_para", "text": "Fresh water hauled and poured. The animals drink deeply."},
+                {"kind": "goto_scene", "id": "b_ani_water_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_ani_done",
+              "text": "Animal chores are done. Head back to the house.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_ani_done_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "sc_building",
+      "filename": "building",
+      "title": "Construction Projects",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_bld_intro",
+          "text": "You survey the land with a practiced eye. Every structure you build here is one more piece of the life you are making. Tools, lumber, sweat — that is what it costs."
+        },
+        {
+          "kind": "if",
+          "id": "b_bld_no_shed_warn",
+          "branches": [
+            {
+              "id": "br_bld_no_shed",
+              "conditionMode": "simple",
+              "condition": {"variable": "has_tool_shed", "operator": "=", "value": "false"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_bld_no_shed_para", "text": "Before anything else, you need a proper tool shed. Without it, every project is twice as hard. Build the tool shed first."}
+              ]
+            },
+            {"id": "br_bld_has_shed", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_bld_progress_display",
+          "branches": [
+            {
+              "id": "br_bld_shed_prog",
+              "conditionMode": "advanced",
+              "condition": {"variable": "shed_prog", "operator": ">", "value": "0"},
+              "conditionRaw": "shed_prog > 0 and not has_tool_shed",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_bld_shed_prog_para", "text": "Tool Shed: ${shed_prog}% complete."}
+              ]
+            },
+            {"id": "br_bld_no_shed_prog", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_bld_coop_prog_display",
+          "branches": [
+            {
+              "id": "br_bld_coop_prog",
+              "conditionMode": "advanced",
+              "condition": {"variable": "coop_prog", "operator": ">", "value": "0"},
+              "conditionRaw": "coop_prog > 0 and not has_chicken_coop",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_bld_coop_prog_para", "text": "Chicken Coop: ${coop_prog}% complete."}
+              ]
+            },
+            {"id": "br_bld_no_coop_prog", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_bld_barn_prog_display",
+          "branches": [
+            {
+              "id": "br_bld_barn_prog",
+              "conditionMode": "advanced",
+              "condition": {"variable": "barn_prog", "operator": ">", "value": "0"},
+              "conditionRaw": "barn_prog > 0 and not has_barn",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_bld_barn_prog_para", "text": "Barn: ${barn_prog}% complete."}
+              ]
+            },
+            {"id": "br_bld_no_barn_prog", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "stat_chart",
+          "id": "b_bld_stats",
+          "title": "Buildings",
+          "entries": [
+            {"id": "sce_bld_shed", "display": "text", "variable": "has_tool_shed", "label": "Tool Shed"},
+            {"id": "sce_bld_coop", "display": "text", "variable": "has_chicken_coop", "label": "Chicken Coop"},
+            {"id": "sce_bld_barn", "display": "text", "variable": "has_barn", "label": "Barn"},
+            {"id": "sce_bld_cellar", "display": "text", "variable": "has_root_cellar", "label": "Root Cellar"},
+            {"id": "sce_bld_greenhouse", "display": "text", "variable": "has_greenhouse", "label": "Greenhouse"},
+            {"id": "sce_bld_smoke", "display": "text", "variable": "has_smokehouse", "label": "Smokehouse"},
+            {"id": "sce_bld_skill", "display": "text", "variable": "building_skill", "label": "Building Skill"}
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_bld_choice",
+          "options": [
+            {
+              "id": "opt_bld_shed",
+              "text": "Tool Shed — the foundation of everything. ($150, ~3 sessions of 3 energy each)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "has_tool_shed", "operator": "=", "value": "false"}],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_bld_shed_prereq",
+                  "branches": [
+                    {
+                      "id": "br_bld_shed_ok",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "energy", "operator": ">=", "value": "3"},
+                      "conditionRaw": "energy >= 3 and money >= 150",
+                      "blocks": [
+                        {"kind": "set", "id": "b_bld_shed_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "set", "id": "b_bld_shed_prog_inc", "variable": "shed_prog", "operator": "+=", "value": "(30 + (building_skill * 5))"},
+                        {"kind": "paragraph", "id": "b_bld_shed_work_para", "text": "You stake out corners, lay the foundation, and work the frame. Progress: ${shed_prog}%."},
+                        {
+                          "kind": "if",
+                          "id": "b_bld_shed_done_check",
+                          "branches": [
+                            {
+                              "id": "br_bld_shed_done",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "shed_prog", "operator": ">=", "value": "100"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_bld_shed_done_flag", "variable": "has_tool_shed", "operator": "=", "value": "true"},
+                                {"kind": "set", "id": "b_bld_shed_done_money", "variable": "money", "operator": "-=", "value": "150"},
+                                {"kind": "set", "id": "b_bld_shed_prog_reset", "variable": "shed_prog", "operator": "=", "value": "0"},
+                                {
+                                  "kind": "if",
+                                  "id": "b_bld_shed_skill_check",
+                                  "branches": [
+                                    {
+                                      "id": "br_bld_shed_skill",
+                                      "conditionMode": "simple",
+                                      "condition": {"variable": "building_skill", "operator": "<", "value": "5"},
+                                      "conditionRaw": "",
+                                      "blocks": [
+                                        {"kind": "set", "id": "b_bld_shed_skill_set", "variable": "building_skill", "operator": "+=", "value": "1"}
+                                      ]
+                                    },
+                                    {"id": "br_bld_shed_no_skill", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                                  ]
+                                },
+                                {"kind": "paragraph", "id": "b_bld_shed_done_para", "text": "The tool shed stands complete. You walk through it twice just to feel the solidity of what you have made. $150 paid for materials. Building skill up!"}
+                              ]
+                            },
+                            {"id": "br_bld_shed_not_done", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_bld_shed_fail",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_bld_shed_fail_para", "text": "You need at least 3 energy and $150 to work on the tool shed."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_bld_shed_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_bld_coop",
+              "text": "Chicken Coop — required to keep hens properly. ($100, ~2 sessions, requires tool shed)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "has_tool_shed and not has_chicken_coop",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_bld_coop_prereq",
+                  "branches": [
+                    {
+                      "id": "br_bld_coop_ok",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "energy", "operator": ">=", "value": "3"},
+                      "conditionRaw": "energy >= 3 and money >= 100",
+                      "blocks": [
+                        {"kind": "set", "id": "b_bld_coop_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "set", "id": "b_bld_coop_prog_inc", "variable": "coop_prog", "operator": "+=", "value": "(40 + (building_skill * 5))"},
+                        {"kind": "paragraph", "id": "b_bld_coop_work_para", "text": "You frame the walls, install the nesting boxes, and wire the run. Coop progress: ${coop_prog}%."},
+                        {
+                          "kind": "if",
+                          "id": "b_bld_coop_done_check",
+                          "branches": [
+                            {
+                              "id": "br_bld_coop_done",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "coop_prog", "operator": ">=", "value": "100"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_bld_coop_done_flag", "variable": "has_chicken_coop", "operator": "=", "value": "true"},
+                                {"kind": "set", "id": "b_bld_coop_done_money", "variable": "money", "operator": "-=", "value": "100"},
+                                {"kind": "set", "id": "b_bld_coop_prog_reset", "variable": "coop_prog", "operator": "=", "value": "0"},
+                                {"kind": "paragraph", "id": "b_bld_coop_done_para", "text": "The coop is snug and fox-proof. You stand back and picture hens scratching in the run. $100 paid. Now you can buy chickens at market."}
+                              ]
+                            },
+                            {"id": "br_bld_coop_not_done", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_bld_coop_fail",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_bld_coop_fail_para", "text": "You need at least 3 energy and $100 to work on the chicken coop."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_bld_coop_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_bld_barn",
+              "text": "Barn — for dairy goats and large-scale storage. ($300, ~5 sessions, requires tool shed)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "has_tool_shed and not has_barn",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_bld_barn_prereq",
+                  "branches": [
+                    {
+                      "id": "br_bld_barn_ok",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "energy", "operator": ">=", "value": "3"},
+                      "conditionRaw": "energy >= 3 and money >= 300",
+                      "blocks": [
+                        {"kind": "set", "id": "b_bld_barn_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "set", "id": "b_bld_barn_prog_inc", "variable": "barn_prog", "operator": "+=", "value": "(20 + (building_skill * 4))"},
+                        {"kind": "paragraph", "id": "b_bld_barn_work_para", "text": "This is the biggest thing you have ever tried to build. Heavy beams, post holes, corrugated roof panels. Barn progress: ${barn_prog}%."},
+                        {
+                          "kind": "if",
+                          "id": "b_bld_barn_done_check",
+                          "branches": [
+                            {
+                              "id": "br_bld_barn_done",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "barn_prog", "operator": ">=", "value": "100"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_bld_barn_done_flag", "variable": "has_barn", "operator": "=", "value": "true"},
+                                {"kind": "set", "id": "b_bld_barn_done_money", "variable": "money", "operator": "-=", "value": "300"},
+                                {"kind": "set", "id": "b_bld_barn_prog_reset", "variable": "barn_prog", "operator": "=", "value": "0"},
+                                {
+                                  "kind": "if",
+                                  "id": "b_bld_barn_skill_check",
+                                  "branches": [
+                                    {
+                                      "id": "br_bld_barn_skill",
+                                      "conditionMode": "simple",
+                                      "condition": {"variable": "building_skill", "operator": "<", "value": "5"},
+                                      "conditionRaw": "",
+                                      "blocks": [
+                                        {"kind": "set", "id": "b_bld_barn_skill_set", "variable": "building_skill", "operator": "+=", "value": "1"}
+                                      ]
+                                    },
+                                    {"id": "br_bld_barn_no_skill", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                                  ]
+                                },
+                                {"kind": "paragraph", "id": "b_bld_barn_done_para", "text": "The barn stands complete. Standing in the center of it, smelling new lumber and straw, you feel the homestead click into place. $300 paid. This is part of what self-sufficiency looks like."}
+                              ]
+                            },
+                            {"id": "br_bld_barn_not_done", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_bld_barn_fail",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_bld_barn_fail_para", "text": "You need at least 3 energy and $300 to work on the barn."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_bld_barn_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_bld_cellar",
+              "text": "Root Cellar — preserve food through winter. ($200, ~4 sessions, requires tool shed)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "has_tool_shed and not has_root_cellar",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_bld_cellar_prereq",
+                  "branches": [
+                    {
+                      "id": "br_bld_cellar_ok",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "energy", "operator": ">=", "value": "3"},
+                      "conditionRaw": "energy >= 3 and money >= 200",
+                      "blocks": [
+                        {"kind": "set", "id": "b_bld_cellar_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "set", "id": "b_bld_cellar_prog_inc", "variable": "cellar_prog", "operator": "+=", "value": "(25 + (building_skill * 4))"},
+                        {"kind": "paragraph", "id": "b_bld_cellar_work_para", "text": "Digging a root cellar is hard, slow work. But every shovelful is insurance against a hungry winter. Cellar progress: ${cellar_prog}%."},
+                        {
+                          "kind": "if",
+                          "id": "b_bld_cellar_done_check",
+                          "branches": [
+                            {
+                              "id": "br_bld_cellar_done",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "cellar_prog", "operator": ">=", "value": "100"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_bld_cellar_done_flag", "variable": "has_root_cellar", "operator": "=", "value": "true"},
+                                {"kind": "set", "id": "b_bld_cellar_done_money", "variable": "money", "operator": "-=", "value": "200"},
+                                {"kind": "set", "id": "b_bld_cellar_prog_reset", "variable": "cellar_prog", "operator": "=", "value": "0"},
+                                {"kind": "paragraph", "id": "b_bld_cellar_done_para", "text": "The root cellar is cool, dark, and dry. The shelves are ready for this fall's harvest. $200 paid. Winter will be less frightening now."}
+                              ]
+                            },
+                            {"id": "br_bld_cellar_not_done", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_bld_cellar_fail",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_bld_cellar_fail_para", "text": "You need at least 3 energy and $200 to dig the root cellar."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_bld_cellar_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_bld_greenhouse",
+              "text": "Greenhouse — grow through winter. ($250, ~4 sessions, requires tool shed and barn)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "has_tool_shed and has_barn and not has_greenhouse",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_bld_greenhouse_prereq",
+                  "branches": [
+                    {
+                      "id": "br_bld_greenhouse_ok",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "energy", "operator": ">=", "value": "3"},
+                      "conditionRaw": "energy >= 3 and money >= 250",
+                      "blocks": [
+                        {"kind": "set", "id": "b_bld_greenhouse_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "set", "id": "b_bld_greenhouse_prog_inc", "variable": "greenhouse_prog", "operator": "+=", "value": "(25 + (building_skill * 4))"},
+                        {"kind": "paragraph", "id": "b_bld_greenhouse_work_para", "text": "Glass panes, timber framing, a south-facing slope. The greenhouse takes shape slowly. Progress: ${greenhouse_prog}%."},
+                        {
+                          "kind": "if",
+                          "id": "b_bld_greenhouse_done_check",
+                          "branches": [
+                            {
+                              "id": "br_bld_greenhouse_done",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "greenhouse_prog", "operator": ">=", "value": "100"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_bld_greenhouse_done_flag", "variable": "has_greenhouse", "operator": "=", "value": "true"},
+                                {"kind": "set", "id": "b_bld_greenhouse_done_money", "variable": "money", "operator": "-=", "value": "250"},
+                                {"kind": "set", "id": "b_bld_greenhouse_prog_reset", "variable": "greenhouse_prog", "operator": "=", "value": "0"},
+                                {"kind": "paragraph", "id": "b_bld_greenhouse_done_para", "text": "The greenhouse catches the weak winter sun and holds it. You can grow through cold months now. $250 paid."}
+                              ]
+                            },
+                            {"id": "br_bld_greenhouse_not_done", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_bld_greenhouse_fail",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_bld_greenhouse_fail_para", "text": "You need at least 3 energy and $250 to build the greenhouse."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_bld_greenhouse_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_bld_smokehouse",
+              "text": "Smokehouse — preserve meat for the long haul. ($180, ~3 sessions, requires tool shed)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "has_tool_shed and not has_smokehouse",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "if",
+                  "id": "b_bld_smoke_prereq",
+                  "branches": [
+                    {
+                      "id": "br_bld_smoke_ok",
+                      "conditionMode": "advanced",
+                      "condition": {"variable": "energy", "operator": ">=", "value": "3"},
+                      "conditionRaw": "energy >= 3 and money >= 180",
+                      "blocks": [
+                        {"kind": "set", "id": "b_bld_smoke_energy", "variable": "energy", "operator": "-=", "value": "3"},
+                        {"kind": "set", "id": "b_bld_smoke_prog_inc", "variable": "smoke_prog", "operator": "+=", "value": "(30 + (building_skill * 5))"},
+                        {"kind": "paragraph", "id": "b_bld_smoke_work_para", "text": "Cinder blocks, a firebox, a hanging rack, and a tight-fitting door. The smokehouse takes shape. Progress: ${smoke_prog}%."},
+                        {
+                          "kind": "if",
+                          "id": "b_bld_smoke_done_check",
+                          "branches": [
+                            {
+                              "id": "br_bld_smoke_done",
+                              "conditionMode": "simple",
+                              "condition": {"variable": "smoke_prog", "operator": ">=", "value": "100"},
+                              "conditionRaw": "",
+                              "blocks": [
+                                {"kind": "set", "id": "b_bld_smoke_done_flag", "variable": "has_smokehouse", "operator": "=", "value": "true"},
+                                {"kind": "set", "id": "b_bld_smoke_done_money", "variable": "money", "operator": "-=", "value": "180"},
+                                {"kind": "set", "id": "b_bld_smoke_prog_reset", "variable": "smoke_prog", "operator": "=", "value": "0"},
+                                {"kind": "paragraph", "id": "b_bld_smoke_done_para", "text": "The smokehouse is complete and ready to cure meat. Rabbit harvests will now yield 8 food instead of 5. $180 paid."}
+                              ]
+                            },
+                            {"id": "br_bld_smoke_not_done", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_bld_smoke_fail",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_bld_smoke_fail_para", "text": "You need at least 3 energy and $180 to build the smokehouse."}
+                      ]
+                    }
+                  ]
+                },
+                {"kind": "goto_scene", "id": "b_bld_smoke_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_bld_done",
+              "text": "Not today. Back to the house.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_bld_done_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "sc_foraging",
+      "filename": "foraging",
+      "title": "Into the Woods",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_frg_intro",
+          "text": "The woods at the edge of your property are generous if you know how to read them. You pull on your boots and head into the tree line, a basket over your arm and a folding knife in your pocket."
+        },
+        {"kind": "set", "id": "b_frg_energy", "variable": "energy", "operator": "-=", "value": "2"},
+        {"kind": "set", "id": "b_frg_roll", "variable": "forage_roll", "operator": "=", "value": "(day % 5)"},
+        {
+          "kind": "if",
+          "id": "b_frg_result",
+          "branches": [
+            {
+              "id": "br_frg_berries",
+              "conditionMode": "simple",
+              "condition": {"variable": "forage_roll", "operator": "=", "value": "0"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "set", "id": "b_frg_berries_food", "variable": "food_supply", "operator": "+=", "value": "8"},
+                {"kind": "paragraph", "id": "b_frg_berries_para", "text": "You find a sprawling patch of blackberries, heavy and ripe. You eat as you pick and still bring back a full basket. +8 food."}
+              ]
+            },
+            {
+              "id": "br_frg_mushrooms",
+              "conditionMode": "simple",
+              "condition": {"variable": "forage_roll", "operator": "=", "value": "1"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "set", "id": "b_frg_mush_food", "variable": "food_supply", "operator": "+=", "value": "12"},
+                {"kind": "paragraph", "id": "b_frg_mush_para", "text": "A ring of hen-of-the-woods mushrooms has appeared at the base of an old oak. You fill half your basket, leaving enough to fruit again. +12 food."}
+              ]
+            },
+            {
+              "id": "br_frg_firewood",
+              "conditionMode": "simple",
+              "condition": {"variable": "forage_roll", "operator": "=", "value": "2"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "set", "id": "b_frg_wood_food", "variable": "food_supply", "operator": "+=", "value": "2"},
+                {"kind": "set", "id": "b_frg_wood_money", "variable": "money", "operator": "+=", "value": "15"},
+                {"kind": "paragraph", "id": "b_frg_wood_para", "text": "Today the woods give firewood more than food — a fallen ash tree, dry and straight-grained. You spend the afternoon splitting. A neighbor pays $15 for a cord. +2 food, +$15."}
+              ]
+            },
+            {
+              "id": "br_frg_herbs",
+              "conditionMode": "simple",
+              "condition": {"variable": "forage_roll", "operator": "=", "value": "3"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "set", "id": "b_frg_herbs_food", "variable": "food_supply", "operator": "+=", "value": "6"},
+                {"kind": "paragraph", "id": "b_frg_herbs_para", "text": "Wild garlic, nettles, and lemon balm. You bundle them to dry from the kitchen rafters. +6 food."},
+                {
+                  "kind": "if",
+                  "id": "b_frg_herbs_skill",
+                  "branches": [
+                    {
+                      "id": "br_frg_herbs_skillup",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "farming_skill", "operator": "<", "value": "5"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_frg_herbs_skillup_set", "variable": "farming_skill", "operator": "+=", "value": "1"},
+                        {"kind": "paragraph", "id": "b_frg_herbs_skillup_para", "text": "Identifying and harvesting wild plants has taught you something. Farming skill up!"}
+                      ]
+                    },
+                    {"id": "br_frg_herbs_no_skill", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "br_frg_meager",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "set", "id": "b_frg_meager_food", "variable": "food_supply", "operator": "+=", "value": "3"},
+                {"kind": "paragraph", "id": "b_frg_meager_para", "text": "It is a quiet trip. A few late raspberries, some watercress by the stream. Not every foray is fruitful, and you are learning to be okay with that. +3 food."}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_frg_winter_mod",
+          "branches": [
+            {
+              "id": "br_frg_winter",
+              "conditionMode": "simple",
+              "condition": {"variable": "season", "operator": "=", "value": "winter"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "set", "id": "b_frg_winter_penalty", "variable": "food_supply", "operator": "-=", "value": "4"},
+                {"kind": "paragraph", "id": "b_frg_winter_para", "text": "The winter woods are spare. Your haul is reduced by the cold and bare trees. -4 food."}
+              ]
+            },
+            {"id": "br_frg_no_winter", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_frg_goto",
+          "sceneName": "homestead_hub",
+          "label": ""
+        }
+      ]
+    },
+
+    {
+      "id": "sc_market",
+      "filename": "market",
+      "title": "Hollow Creek Market",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_mkt_intro",
+          "text": "The Hollow Creek market sets up in the gravel lot behind the feed store every Saturday. Twenty stalls, knowing looks between neighbors, quiet commerce. You walk the rows with your list."
+        },
+        {
+          "kind": "stat_chart",
+          "id": "b_mkt_stats",
+          "title": "Your Inventory",
+          "entries": [
+            {"id": "sce_mkt_food", "display": "text", "variable": "food_supply", "label": "Food Supply"},
+            {"id": "sce_mkt_eggs", "display": "text", "variable": "eggs", "label": "Eggs"},
+            {"id": "sce_mkt_money", "display": "text", "variable": "money", "label": "Money ($)"}
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_mkt_choice",
+          "options": [
+            {
+              "id": "opt_mkt_sell_food",
+              "text": "Sell surplus food. ($3 per unit — sells all above 25 stored, max 20 units)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "food_supply", "operator": ">", "value": "25"}],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_sell_calc", "variable": "sell_amount", "operator": "=", "value": "(food_supply - 25)"},
+                {
+                  "kind": "if",
+                  "id": "b_mkt_sell_cap",
+                  "branches": [
+                    {
+                      "id": "br_mkt_sell_overcap",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "sell_amount", "operator": ">", "value": "20"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_mkt_sell_cap_set", "variable": "sell_amount", "operator": "=", "value": "20"}
+                      ]
+                    },
+                    {"id": "br_mkt_sell_ok", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                  ]
+                },
+                {"kind": "set", "id": "b_mkt_sell_food", "variable": "food_supply", "operator": "-=", "value": "sell_amount"},
+                {"kind": "set", "id": "b_mkt_sell_money", "variable": "money", "operator": "+=", "value": "(sell_amount * 3)"},
+                {"kind": "paragraph", "id": "b_mkt_sell_para", "text": "You unload ${sell_amount} units of surplus into the cooperative bins. Cash in hand. The larder is still stocked."},
+                {"kind": "goto_scene", "id": "b_mkt_sell_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_sell_eggs",
+              "text": "Sell egg surplus. ($2 per egg unit — sells all above 5)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "eggs", "operator": ">", "value": "5"}],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_egg_sell_calc", "variable": "sell_amount", "operator": "=", "value": "(eggs - 5)"},
+                {"kind": "set", "id": "b_mkt_egg_sell_eggs", "variable": "eggs", "operator": "-=", "value": "sell_amount"},
+                {"kind": "set", "id": "b_mkt_egg_sell_money", "variable": "money", "operator": "+=", "value": "(sell_amount * 2)"},
+                {"kind": "paragraph", "id": "b_mkt_egg_para", "text": "The egg cartons disappear from the table in the first half hour. Good money for what you keep naturally replenishing."},
+                {"kind": "goto_scene", "id": "b_mkt_egg_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_seeds",
+              "text": "Buy a packet of seeds. ($15)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "money >= 15 and not has_seeds",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_seeds_money", "variable": "money", "operator": "-=", "value": "15"},
+                {"kind": "set", "id": "b_mkt_seeds_set", "variable": "has_seeds", "operator": "=", "value": "true"},
+                {"kind": "paragraph", "id": "b_mkt_seeds_para", "text": "A paper packet of mixed heirloom vegetables goes into your coat pocket. Good investment."},
+                {"kind": "goto_scene", "id": "b_mkt_seeds_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_chickens",
+              "text": "Buy 2 laying hens. ($40 — requires chicken coop)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "money >= 40 and has_chicken_coop",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_chick_money", "variable": "money", "operator": "-=", "value": "40"},
+                {"kind": "set", "id": "b_mkt_chick_set", "variable": "chickens", "operator": "+=", "value": "2"},
+                {"kind": "paragraph", "id": "b_mkt_chick_para", "text": "Two Rhode Island Reds go into a cardboard box in the truck bed. They make their opinions known the entire drive home."},
+                {"kind": "goto_scene", "id": "b_mkt_chick_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_goat",
+              "text": "Buy a dairy goat. ($80 — requires barn)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "money >= 80 and has_barn",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_goat_money", "variable": "money", "operator": "-=", "value": "80"},
+                {"kind": "set", "id": "b_mkt_goat_set", "variable": "goats", "operator": "+=", "value": "1"},
+                {"kind": "paragraph", "id": "b_mkt_goat_para", "text": "She has a thoughtful expression and immediately tests the latch on her new stall. You name her Hazel."},
+                {"kind": "goto_scene", "id": "b_mkt_goat_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_rabbits",
+              "text": "Buy a pair of rabbits. ($25)",
+              "conditionMode": "simple",
+              "conditions": [{"variable": "money", "operator": ">=", "value": "25"}],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_rabbit_money", "variable": "money", "operator": "-=", "value": "25"},
+                {"kind": "set", "id": "b_mkt_rabbit_set", "variable": "rabbits", "operator": "+=", "value": "2"},
+                {"kind": "paragraph", "id": "b_mkt_rabbit_para", "text": "A breeding pair, already half-grown. Within a few weeks there will be more."},
+                {"kind": "goto_scene", "id": "b_mkt_rabbit_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_tools",
+              "text": "Buy better tools. ($60 — increases max energy by 2)",
+              "conditionMode": "advanced",
+              "conditions": [],
+              "conditionRaw": "money >= 60 and max_energy < 14",
+              "visibility": "selectable_if",
+              "blocks": [
+                {"kind": "set", "id": "b_mkt_tools_money", "variable": "money", "operator": "-=", "value": "60"},
+                {"kind": "set", "id": "b_mkt_tools_energy", "variable": "max_energy", "operator": "+=", "value": "2"},
+                {"kind": "paragraph", "id": "b_mkt_tools_para", "text": "A quality hoe, a sharpening stone, a steel-tined rake. Good tools make a perceptible difference in how much you can accomplish in a day."},
+                {"kind": "goto_scene", "id": "b_mkt_tools_goto", "sceneName": "market", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_mkt_done",
+              "text": "That is enough trading for today. Head home.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_mkt_done_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "sc_season_change",
+      "filename": "season_change",
+      "title": "The Seasons Turn",
+      "blocks": [
+        {
+          "kind": "if",
+          "id": "b_ssn_which",
+          "branches": [
+            {
+              "id": "br_ssn_to_summer",
+              "conditionMode": "advanced",
+              "condition": {"variable": "day", "operator": ">", "value": "0"},
+              "conditionRaw": "day >= 91 and season = \"spring\"",
+              "blocks": [
+                {"kind": "set", "id": "b_ssn_summer_set", "variable": "season", "operator": "=", "value": "\"summer\""},
+                {"kind": "set", "id": "b_ssn_summer_energy", "variable": "max_energy", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_ssn_summer_energy_cur", "variable": "energy", "operator": "=", "value": "max_energy"},
+                {"kind": "paragraph", "id": "b_ssn_summer_para", "text": "The spring rains have stopped. The days are long and hot now, and the garden is in full force. Summer on a homestead is both reward and relentless demand. Longer days mean more energy — max energy increased by 1."}
+              ]
+            },
+            {
+              "id": "br_ssn_to_fall",
+              "conditionMode": "advanced",
+              "condition": {"variable": "day", "operator": ">", "value": "0"},
+              "conditionRaw": "day >= 181 and season = \"summer\"",
+              "blocks": [
+                {"kind": "set", "id": "b_ssn_fall_set", "variable": "season", "operator": "=", "value": "\"fall\""},
+                {"kind": "set", "id": "b_ssn_fall_energy", "variable": "max_energy", "operator": "-=", "value": "1"},
+                {"kind": "set", "id": "b_ssn_fall_garden", "variable": "garden_health", "operator": "-=", "value": "10"},
+                {"kind": "paragraph", "id": "b_ssn_fall_para", "text": "The light changes first — a slant to it you haven't seen since last year. The nights are cooler and the leaves at the wood's edge are turning. Fall is the season of harvest and hurry. Shorter days reduce your energy cap by 1. Tend the soil before winter sets in."}
+              ]
+            },
+            {
+              "id": "br_ssn_to_winter",
+              "conditionMode": "advanced",
+              "condition": {"variable": "day", "operator": ">", "value": "0"},
+              "conditionRaw": "day >= 271 and season = \"fall\"",
+              "blocks": [
+                {"kind": "set", "id": "b_ssn_winter_set", "variable": "season", "operator": "=", "value": "\"winter\""},
+                {"kind": "set", "id": "b_ssn_winter_energy", "variable": "max_energy", "operator": "-=", "value": "1"},
+                {"kind": "set", "id": "b_ssn_winter_food", "variable": "food_supply", "operator": "-=", "value": "10"},
+                {
+                  "kind": "if",
+                  "id": "b_ssn_winter_cellar",
+                  "branches": [
+                    {
+                      "id": "br_ssn_winter_cellar",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "has_root_cellar", "operator": "=", "value": "true"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "set", "id": "b_ssn_cellar_bonus", "variable": "food_supply", "operator": "+=", "value": "8"},
+                        {"kind": "paragraph", "id": "b_ssn_cellar_para", "text": "The root cellar proves its worth already. The preserved goods on the shelves take some of the edge off the season. +8 food from preserved stores."}
+                      ]
+                    },
+                    {"id": "br_ssn_no_cellar", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_ssn_winter_food_warn",
+                  "branches": [
+                    {
+                      "id": "br_ssn_food_low",
+                      "conditionMode": "simple",
+                      "condition": {"variable": "food_supply", "operator": "<", "value": "10"},
+                      "conditionRaw": "",
+                      "blocks": [
+                        {"kind": "paragraph", "id": "b_ssn_food_low_para", "text": "Your food stores are already thin as winter begins. The next months will be hard. Focus on foraging and whatever you can still grow."}
+                      ]
+                    },
+                    {"id": "br_ssn_food_ok", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+                  ]
+                },
+                {"kind": "paragraph", "id": "b_ssn_winter_para", "text": "The first real frost arrives without fanfare — just cold air through the gap under the door and a stillness outside that feels different from other silences. Winter shows you exactly what you prepared for and exactly what you forgot. Energy cap reduced by 1. -10 food from winter subsistence costs."}
+              ]
+            },
+            {
+              "id": "br_ssn_else",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_ssn_else_para", "text": "The seasons shift around you. The land adjusts, and so do you."}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_ssn_goto",
+          "sceneName": "homestead_hub",
+          "label": ""
+        }
+      ]
+    },
+
+    {
+      "id": "sc_year_end",
+      "filename": "year_end",
+      "title": "Year's End Assessment",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_yr_intro",
+          "text": "You sit at the kitchen table on the last day of the year with your notebook open and a cup of tea going cold beside you. This is the accounting — honest and complete."
+        },
+        {
+          "kind": "stat_chart",
+          "id": "b_yr_stats",
+          "title": "End of Year ${year} Summary",
+          "entries": [
+            {"id": "sce_yr_food", "display": "text", "variable": "food_supply", "label": "Food Supply"},
+            {"id": "sce_yr_money", "display": "text", "variable": "money", "label": "Money ($)"},
+            {"id": "sce_yr_farm", "display": "text", "variable": "farming_skill", "label": "Farming Skill"},
+            {"id": "sce_yr_animal", "display": "text", "variable": "animal_skill", "label": "Animal Skill"},
+            {"id": "sce_yr_build", "display": "text", "variable": "building_skill", "label": "Building Skill"},
+            {"id": "sce_yr_shed", "display": "text", "variable": "has_tool_shed", "label": "Tool Shed"},
+            {"id": "sce_yr_barn", "display": "text", "variable": "has_barn", "label": "Barn"},
+            {"id": "sce_yr_coop", "display": "text", "variable": "has_chicken_coop", "label": "Chicken Coop"},
+            {"id": "sce_yr_cellar", "display": "text", "variable": "has_root_cellar", "label": "Root Cellar"},
+            {"id": "sce_yr_greenhouse", "display": "text", "variable": "has_greenhouse", "label": "Greenhouse"},
+            {"id": "sce_yr_chickens", "display": "text", "variable": "chickens", "label": "Chickens"},
+            {"id": "sce_yr_goats", "display": "text", "variable": "goats", "label": "Goats"},
+            {"id": "sce_yr_rabbits", "display": "text", "variable": "rabbits", "label": "Rabbits"}
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_yr_food_assess",
+          "branches": [
+            {
+              "id": "br_yr_food_great",
+              "conditionMode": "simple",
+              "condition": {"variable": "food_supply", "operator": ">=", "value": "50"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_food_great_para", "text": "Your larder is genuinely full. You are feeding yourself from this land — not just surviving, producing."}
+              ]
+            },
+            {
+              "id": "br_yr_food_ok",
+              "conditionMode": "simple",
+              "condition": {"variable": "food_supply", "operator": ">=", "value": "25"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_food_ok_para", "text": "Your food supply is decent but not comfortable. Another good season will get you there."}
+              ]
+            },
+            {
+              "id": "br_yr_food_low",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_food_low_para", "text": "Food has been the struggle this year. Winter was close. The garden and animals need more attention next season."}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_yr_money_assess",
+          "branches": [
+            {
+              "id": "br_yr_money_great",
+              "conditionMode": "simple",
+              "condition": {"variable": "money", "operator": ">=", "value": "200"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_money_great_para", "text": "The tin on the shelf holds real money. The homestead is not just feeding you — it is sustaining you financially."}
+              ]
+            },
+            {
+              "id": "br_yr_money_ok",
+              "conditionMode": "simple",
+              "condition": {"variable": "money", "operator": ">=", "value": "100"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_money_ok_para", "text": "Money is manageable. You are not in trouble, but the market needs more attention next year."}
+              ]
+            },
+            {
+              "id": "br_yr_money_low",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_money_low_para", "text": "Funds are tight. Find ways to generate more income from the land — surplus crops, eggs, and firewood all sell."}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_yr_barn_assess",
+          "branches": [
+            {
+              "id": "br_yr_has_barn",
+              "conditionMode": "simple",
+              "condition": {"variable": "has_barn", "operator": "=", "value": "true"},
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_barn_para", "text": "The barn stands solid. It changes what is possible here."}
+              ]
+            },
+            {
+              "id": "br_yr_no_barn",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_yr_no_barn_para", "text": "The barn is still unbuilt. That limits you in ways you feel every day."}
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_yr_win_check",
+          "branches": [
+            {
+              "id": "br_yr_win",
+              "conditionMode": "advanced",
+              "condition": {"variable": "day", "operator": ">", "value": "0"},
+              "conditionRaw": "win_condition_met or (food_supply > 50 and money > 200 and has_barn)",
+              "blocks": [
+                {"kind": "set", "id": "b_yr_win_set", "variable": "win_condition_met", "operator": "=", "value": "true"},
+                {"kind": "paragraph", "id": "b_yr_win_para", "text": "Something settles in your chest this evening — a quiet certainty. You have enough food stored. Money in the tin. The barn stands. This is what self-sufficiency feels like."},
+                {"kind": "goto_scene", "id": "b_yr_win_goto", "sceneName": "endings", "label": ""}
+              ]
+            },
+            {"id": "br_yr_no_win", "conditionMode": "simple", "condition": null, "conditionRaw": "", "blocks": []}
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_yr_choice",
+          "options": [
+            {
+              "id": "opt_yr_continue",
+              "text": "You are just getting started. Begin Year ${year} again with fresh resolve.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "set", "id": "b_yr_cont_day", "variable": "day", "operator": "=", "value": "1"},
+                {"kind": "set", "id": "b_yr_cont_season", "variable": "season", "operator": "=", "value": "\"spring\""},
+                {"kind": "set", "id": "b_yr_cont_year", "variable": "year", "operator": "+=", "value": "1"},
+                {"kind": "set", "id": "b_yr_cont_energy", "variable": "max_energy", "operator": "=", "value": "10"},
+                {"kind": "set", "id": "b_yr_cont_energy_cur", "variable": "energy", "operator": "=", "value": "10"},
+                {"kind": "paragraph", "id": "b_yr_cont_para", "text": "Year ${year} begins. The mud is back, the robins are back, and you have survived another winter on the land. You know more now. Your hands are rougher. The homestead feels less like a project and more like a life."},
+                {"kind": "goto_scene", "id": "b_yr_cont_goto", "sceneName": "homestead_hub", "label": ""}
+              ]
+            },
+            {
+              "id": "opt_yr_endings",
+              "text": "Look back and see what you have built.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {"kind": "goto_scene", "id": "b_yr_end_goto", "sceneName": "endings", "label": ""}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "sc_endings",
+      "filename": "endings",
+      "title": "How It All Turned Out",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_end_intro",
+          "text": "Years pass the way they do on land — in seasons, in harvests, in the slow accumulation of what you know. You sit on the porch one evening and think about how it has all come out."
+        },
+        {
+          "kind": "stat_chart",
+          "id": "b_end_stats",
+          "title": "Final Homestead State",
+          "entries": [
+            {"id": "sce_end_food", "display": "text", "variable": "food_supply", "label": "Food Supply"},
+            {"id": "sce_end_money", "display": "text", "variable": "money", "label": "Money ($)"},
+            {"id": "sce_end_farm", "display": "text", "variable": "farming_skill", "label": "Farming Skill"},
+            {"id": "sce_end_animal", "display": "text", "variable": "animal_skill", "label": "Animal Skill"},
+            {"id": "sce_end_build", "display": "text", "variable": "building_skill", "label": "Building Skill"},
+            {"id": "sce_end_barn", "display": "text", "variable": "has_barn", "label": "Barn Built"},
+            {"id": "sce_end_year", "display": "text", "variable": "year", "label": "Years Spent"}
+          ]
+        },
+        {
+          "kind": "if",
+          "id": "b_end_branch",
+          "branches": [
+            {
+              "id": "br_end_full",
+              "conditionMode": "advanced",
+              "condition": {"variable": "food_supply", "operator": ">", "value": "50"},
+              "conditionRaw": "food_supply > 50 and money > 200 and has_barn and farming_skill >= 4",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_end_full_para", "text": "The homestead runs itself now in the way that living things do — not without effort, but with a rhythm you trust. You grow most of what you eat. You earn what you need. The barn is full. The root cellar is stocked. Friends from the city come to visit and cannot quite believe the life you have built here. Hollow Creek knows your name.\n\nYou have become what you set out to become."},
+                {"kind": "ending", "id": "b_end_full_end"}
+              ]
+            },
+            {
+              "id": "br_end_good",
+              "conditionMode": "advanced",
+              "condition": {"variable": "food_supply", "operator": ">", "value": "30"},
+              "conditionRaw": "food_supply > 30 and money > 100 and has_barn",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_end_good_para", "text": "It is not the perfect self-sufficient life you imagined in the beginning. But it is a real one. You grow a good portion of your food. You have animals that know you. The barn stands. You buy what you cannot grow and sell what you have extra of.\n\nIt turns out this — this imperfect, muddy, satisfying life — is exactly enough."},
+                {"kind": "ending", "id": "b_end_good_end"}
+              ]
+            },
+            {
+              "id": "br_end_lessons",
+              "conditionMode": "advanced",
+              "condition": {"variable": "food_supply", "operator": ">", "value": "15"},
+              "conditionRaw": "food_supply > 15 and money > 50",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_end_lessons_para", "text": "The homestead has not become what the notebooks said it would. But you have stayed. That turns out to matter more than any plan. You know things now that cannot be taught — how soil changes in your hands, what animals need before they tell you, how quiet winter really is.\n\nNext year, you tell yourself. Next year you will get the barn up."},
+                {"kind": "ending", "id": "b_end_lessons_end"}
+              ]
+            },
+            {
+              "id": "br_end_over",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {"kind": "paragraph", "id": "b_end_over_para", "text": "By the second winter, you have to admit it. The land won this round. You pack what fits in the truck and drive out to the main road, looking once in the mirror at the farmhouse getting smaller.\n\nIt was not failure, you decide. It was school. The most expensive school you have ever attended, and the one whose lessons you will never forget."},
+                {"kind": "ending", "id": "b_end_over_end"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+.section {
+  border-bottom: 1px solid var(--chrome-border);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--chrome-text-dim);
+}
+
+.sectionHeader button {
+  width: 20px;
+  height: 20px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--chrome-text-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.12s, color 0.12s;
+  line-height: 1;
+}
+
+.sectionHeader button:hover {
+  background: var(--chrome-hover);
+  color: var(--chrome-text);
+  border-color: var(--chrome-border2);
+}
+
+.addForm {
+  padding: 8px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: var(--chrome-raised);
+  border-bottom: 1px solid var(--chrome-border);
+}
+
+.addForm input,
+.addForm select {
+  padding: 5px 8px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border2);
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--chrome-text);
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.addForm input:focus,
+.addForm select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.addForm select option { background: var(--chrome-bg); }
+
+.addButtons {
+  display: flex;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.addButtons button {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid var(--chrome-border2);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 500;
+  transition: background 0.12s, color 0.12s;
+  background: var(--chrome-hover);
+  color: var(--chrome-text-sub);
+}
+
+.addButtons button:first-child {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.addButtons button:first-child:hover {
+  background: var(--accent-hover);
+}
+
+.addButtons button:last-child:hover {
+  background: var(--chrome-active);
+  color: var(--chrome-text);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  padding: 7px 14px;
+  cursor: pointer;
+  position: relative;
+  min-height: 34px;
+  transition: background 0.1s;
+  gap: 6px;
+}
+
+.listItem:hover { background: var(--chrome-hover); }
+
+.listItem.active {
+  background: var(--chrome-active);
+}
+
+.listItem.active .sceneName { color: var(--chrome-text); }
+.listItem.active .sceneFilename { color: var(--accent); }
+
+.activeIndicator {
+  width: 3px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 2px;
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sceneName {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--chrome-text-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sceneFilename {
+  font-size: 10px;
+  color: var(--chrome-text-dim);
+  font-family: monospace;
+}
+
+.itemActions {
+  display: none;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.listItem:hover .itemActions { display: flex; }
+
+.itemActions button {
+  padding: 2px 5px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--chrome-text-sub);
+  transition: background 0.1s, color 0.1s;
+}
+
+.itemActions button:hover {
+  background: var(--chrome-border2);
+  color: var(--chrome-text);
+}
+
+.inlineEdit {
+  flex: 1;
+  padding: 3px 6px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 12.5px;
+  color: var(--chrome-text);
+  outline: none;
+}
+
+.varInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.varName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--chrome-text);
+  font-family: monospace;
+}
+
+.varMeta {
+  font-size: 10px;
+  color: var(--chrome-text-dim);
+  font-family: monospace;
+}

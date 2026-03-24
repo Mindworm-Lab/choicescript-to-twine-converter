@@ -1,0 +1,2835 @@
+{
+  "id": "demo-solo-leveling-v2",
+  "title": "Shadows of the Gate: An E-Rank Story",
+  "author": "Demo",
+  "variables": [
+    {
+      "id": "v_stamina",
+      "name": "stamina",
+      "type": "number",
+      "defaultValue": 100,
+      "description": "Hunter energy — depleted by dungeon runs"
+    },
+    {
+      "id": "v_gold",
+      "name": "gold",
+      "type": "number",
+      "defaultValue": 50,
+      "description": "Gold earned through hunting"
+    },
+    {
+      "id": "v_rep",
+      "name": "reputation",
+      "type": "number",
+      "defaultValue": 0,
+      "description": "Standing among hunters in the district"
+    },
+    {
+      "id": "v_potion",
+      "name": "has_potion",
+      "type": "boolean",
+      "defaultValue": false,
+      "description": "Whether carrying a health potion"
+    },
+    {
+      "id": "v_days",
+      "name": "days_active",
+      "type": "number",
+      "defaultValue": 0,
+      "description": "Days spent actively hunting"
+    },
+    {
+      "id": "v_str",
+      "name": "str_stat",
+      "type": "number",
+      "defaultValue": 5,
+      "description": "Strength — attack power (each point = +2 damage)"
+    },
+    {
+      "id": "v_agi",
+      "name": "agi_stat",
+      "type": "number",
+      "defaultValue": 5,
+      "description": "Agility — dodge and counter power"
+    },
+    {
+      "id": "v_int",
+      "name": "int_stat",
+      "type": "number",
+      "defaultValue": 5,
+      "description": "Intelligence — mana and skill effectiveness"
+    },
+    {
+      "id": "v_vit",
+      "name": "vit_stat",
+      "type": "number",
+      "defaultValue": 5,
+      "description": "Vitality — max HP (each point = +10 max HP)"
+    },
+    {
+      "id": "v_end",
+      "name": "end_stat",
+      "type": "number",
+      "defaultValue": 5,
+      "description": "Endurance — stamina efficiency"
+    },
+    {
+      "id": "v_sp",
+      "name": "stat_points",
+      "type": "number",
+      "defaultValue": 5,
+      "description": "Unallocated stat points from awakening"
+    },
+    {
+      "id": "v_hp",
+      "name": "hp",
+      "type": "number",
+      "defaultValue": 50,
+      "description": "Current HP"
+    },
+    {
+      "id": "v_maxhp",
+      "name": "max_hp",
+      "type": "number",
+      "defaultValue": 50,
+      "description": "Maximum HP"
+    },
+    {
+      "id": "v_ehp",
+      "name": "enemy_hp",
+      "type": "number",
+      "defaultValue": 0,
+      "description": "Current enemy HP in combat"
+    },
+    {
+      "id": "v_dungeons",
+      "name": "dungeons_cleared",
+      "type": "number",
+      "defaultValue": 0,
+      "description": "Total dungeons cleared"
+    },
+    {
+      "id": "v_cround",
+      "name": "combat_round",
+      "type": "number",
+      "defaultValue": 0,
+      "description": "Current combat round tracker"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_startup",
+      "filename": "startup",
+      "title": "Startup",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_startup_intro",
+          "text": "Ten years ago, the Gates appeared without warning — shimmering rifts torn in the fabric of the world above subway stations, in parking lots, in the middle of the Han River. Monsters poured through. Humanity nearly broke. Then the Awakened rose: ordinary people who manifested extraordinary power, classified and ranked, sent into the Gates to push the monsters back.\n\nSeoul, 2024. The system is routine now. The Hunter Association ranks Awakened from E to S. Gates are managed like municipal infrastructure. And you — Kim Jae-won, twenty-three years old, part-time convenience store worker — have just been called in for your official rank assessment.\n\nYou are not destined for greatness. The legends whispered about in the Hunter District — the ones who clear A-rank gates solo, the ones whose names trend on portals — that's not your story. Your story is simpler: survive, earn enough to make rent, and maybe, eventually, move up one rank at a time."
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_startup_goto_awakening",
+          "sceneName": "awakening",
+          "label": ""
+        }
+      ]
+    },
+    {
+      "id": "sc_awakening",
+      "filename": "awakening",
+      "title": "The Awakening",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_awk_intro",
+          "text": "The Hunter Association office smells like coffee and anxiety. The examiner, Ms. Choi, doesn't look up from her clipboard as you sit down. 'Kim Jae-won? E-rank. Confirmed.' She stamps your license. 'Congratulations — you're officially the bottom of the food chain.' She slides a starter kit across the desk: one short sword, 50 gold, and a printed sheet of district rules."
+        },
+        {
+          "kind": "choice",
+          "id": "b_awk_choice",
+          "options": [
+            {
+              "id": "opt_awk_a",
+              "text": "\"E-rank isn't so bad. I'll work my way up.\"",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_awk_a_para",
+                  "text": "Ms. Choi's expression doesn't change, but she stamps your license with slightly more force — something like approval. 'That's what they all say. The ones who mean it don't come back for complaint forms.' She adds a second pamphlet to your kit: hunter district map."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_awk_a_set_rep",
+                  "variable": "reputation",
+                  "operator": "+=",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "id": "opt_awk_b",
+              "text": "\"There must be some mistake — I can feel something inside me.\"",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_awk_b_para",
+                  "text": "'There's no mistake,' she says, not unkindly. 'E-rank means you're strong enough to survive E-rank gates. That's not nothing.' She slides an extra health potion across the desk, her expression flat. 'New hunters with high self-belief tend to need these.'"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_awk_b_set_potion",
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "true"
+                }
+              ]
+            },
+            {
+              "id": "opt_awk_c",
+              "text": "Accept the rank without argument and pocket the kit.",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_awk_c_para",
+                  "text": "Smart. Ms. Choi gives you a brief nod of professional approval. 'Training center is two blocks east before you hit the gates. New hunters who skip it don't come back.' She places an extra 10 gold in the kit."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_awk_c_set_gold",
+                  "variable": "gold",
+                  "operator": "+=",
+                  "value": "10"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_awk_goto_statalloc",
+          "sceneName": "stat_alloc",
+          "label": ""
+        }
+      ]
+    },
+    {
+      "id": "sc_stat_alloc",
+      "filename": "stat_alloc",
+      "title": "Aptitude Center",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_sa_intro",
+          "text": "A technician in Association colors leads you to the Aptitude Enhancement Center, a side room with a glowing calibration array in the center. 'New-hunter package: five free Stat Points. Distribute them however you like before you hit the field.' She gestures at the display. 'This is your foundation. Choose carefully — no refunds once we close the session.'"
+        },
+        {
+          "kind": "comment",
+          "id": "b_sa_comment_init",
+          "text": "Initialize max_hp from starting VIT, set current HP"
+        },
+        {
+          "kind": "set",
+          "id": "b_sa_set_maxhp_init",
+          "variable": "max_hp",
+          "operator": "=",
+          "value": "(vit_stat * 10)"
+        },
+        {
+          "kind": "set",
+          "id": "b_sa_set_hp_init",
+          "variable": "hp",
+          "operator": "=",
+          "value": "max_hp"
+        },
+        {
+          "kind": "label",
+          "id": "b_sa_label_hub",
+          "name": "alloc_hub"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_sa_alloc_guide",
+          "text": "Free Points remaining: ${stat_points}. Select a stat below to invest one point. You may keep allocating until your points run out, then confirm your build to enter the field."
+        },
+        {
+          "kind": "stat_chart",
+          "id": "b_sa_panel",
+          "title": "Stat Allocation",
+          "entries": [
+            {
+              "id": "sce_sa_str",
+              "display": "text",
+              "variable": "str_stat",
+              "label": "STR — Strength"
+            },
+            {
+              "id": "sce_sa_agi",
+              "display": "text",
+              "variable": "agi_stat",
+              "label": "AGI — Agility"
+            },
+            {
+              "id": "sce_sa_int",
+              "display": "text",
+              "variable": "int_stat",
+              "label": "INT — Intelligence"
+            },
+            {
+              "id": "sce_sa_vit",
+              "display": "text",
+              "variable": "vit_stat",
+              "label": "VIT — Vitality"
+            },
+            {
+              "id": "sce_sa_end",
+              "display": "text",
+              "variable": "end_stat",
+              "label": "END — Endurance"
+            },
+            {
+              "id": "sce_sa_sp",
+              "display": "text",
+              "variable": "stat_points",
+              "label": "Free Points"
+            },
+            {
+              "id": "sce_sa_hp",
+              "display": "percent",
+              "variable": "hp",
+              "maxVariable": "max_hp",
+              "label": "HP"
+            }
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_sa_choice",
+          "options": [
+            {
+              "id": "opt_sp_str",
+              "text": "[STR ${str_stat}] Strength — Attack Power (+2 dmg per point)",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "stat_points",
+                  "operator": ">",
+                  "value": "0"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_sp_str_inc",
+                  "variable": "str_stat",
+                  "operator": "+=",
+                  "value": "1"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_str_dec_sp",
+                  "variable": "stat_points",
+                  "operator": "-=",
+                  "value": "1"
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_sp_str_goto",
+                  "label": "alloc_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_sp_agi",
+              "text": "[AGI ${agi_stat}] Agility — Dodge and Counter Power",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "stat_points",
+                  "operator": ">",
+                  "value": "0"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_sp_agi_inc",
+                  "variable": "agi_stat",
+                  "operator": "+=",
+                  "value": "1"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_agi_dec_sp",
+                  "variable": "stat_points",
+                  "operator": "-=",
+                  "value": "1"
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_sp_agi_goto",
+                  "label": "alloc_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_sp_int",
+              "text": "[INT ${int_stat}] Intelligence — Mana and Skill Power",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "stat_points",
+                  "operator": ">",
+                  "value": "0"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_sp_int_inc",
+                  "variable": "int_stat",
+                  "operator": "+=",
+                  "value": "1"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_int_dec_sp",
+                  "variable": "stat_points",
+                  "operator": "-=",
+                  "value": "1"
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_sp_int_goto",
+                  "label": "alloc_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_sp_vit",
+              "text": "[VIT ${vit_stat}] Vitality — +10 Max HP per point",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "stat_points",
+                  "operator": ">",
+                  "value": "0"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_sp_vit_inc",
+                  "variable": "vit_stat",
+                  "operator": "+=",
+                  "value": "1"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_vit_set_maxhp",
+                  "variable": "max_hp",
+                  "operator": "=",
+                  "value": "(vit_stat * 10)"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_vit_set_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "max_hp"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_vit_dec_sp",
+                  "variable": "stat_points",
+                  "operator": "-=",
+                  "value": "1"
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_sp_vit_goto",
+                  "label": "alloc_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_sp_end",
+              "text": "[END ${end_stat}] Endurance — Stamina Efficiency",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "stat_points",
+                  "operator": ">",
+                  "value": "0"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_sp_end_inc",
+                  "variable": "end_stat",
+                  "operator": "+=",
+                  "value": "1"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_end_dec_sp",
+                  "variable": "stat_points",
+                  "operator": "-=",
+                  "value": "1"
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_sp_end_goto",
+                  "label": "alloc_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_sp_confirm",
+              "text": "Confirm allocation and enter the Hunter District",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_sp_confirm_maxhp",
+                  "variable": "max_hp",
+                  "operator": "=",
+                  "value": "(vit_stat * 10)"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_sp_confirm_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "max_hp"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_sp_confirm_para",
+                  "text": "The technician nods and logs your configuration. The display freezes your stats.\n\n'Final allocation logged:\nSTR ${str_stat} | AGI ${agi_stat} | INT ${int_stat} | VIT ${vit_stat} | END ${end_stat}\nMax HP: ${max_hp}'\n\nShe adds: 'Training Hall on Block 4 if you want to improve later. Costs gold, but you'll live longer.'"
+                },
+                {
+                  "kind": "goto_scene",
+                  "id": "b_sp_confirm_goto",
+                  "sceneName": "hunter_district",
+                  "label": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sc_hunter_district",
+      "filename": "hunter_district",
+      "title": "Hunter District — Free Roam",
+      "blocks": [
+        {
+          "kind": "comment",
+          "id": "b_hd_comment_hub",
+          "text": "Free movement hub — player loops back here via *goto district_hub"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_hd_intro",
+          "text": "The Hunter District is a city within a city. Weapon shops sit beside potion vendors and quest boards. Hunters in everything from battered leather to gleaming enchanted gear move through the crowds. The air smells like magic residue and fried chicken from the pojangmacha on the corner.\n\nThree gate portals shimmer at the district entrance. A training hall occupies Block 4. The Guild Hall is two minutes north."
+        },
+        {
+          "kind": "label",
+          "id": "b_hd_label_hub",
+          "name": "district_hub"
+        },
+        {
+          "kind": "if",
+          "id": "b_hd_if_hp",
+          "branches": [
+            {
+              "id": "br_hd_hp_low",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "hp",
+                "operator": "<",
+                "value": "max_hp"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_hp_low_para",
+                  "text": "Your HP is at ${hp}/${max_hp}. You should rest or use a potion before entering another gate."
+                }
+              ]
+            },
+            {
+              "id": "br_hd_hp_ok",
+              "conditionMode": "simple",
+              "condition": null,
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_hp_ok_para",
+                  "text": "Your mana circuits flow cleanly. HP: ${hp}/${max_hp}. You feel ready."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "choice",
+          "id": "b_hd_main_choice",
+          "options": [
+            {
+              "id": "opt_hd_dungeon",
+              "text": "Choose a Dungeon Gate [Combat]",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_dungeon_intro",
+                  "text": "Three E-rank portals are active at the gate entrance. The threat assessment board shows today's difficulty ratings."
+                },
+                {
+                  "kind": "choice",
+                  "id": "b_hd_dungeon_choice",
+                  "options": [
+                    {
+                      "id": "opt_hd_goblin",
+                      "text": "[E] Goblin Cave — Goblin pack (Rec. STR 4+)",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "str_stat",
+                          "operator": ">=",
+                          "value": "4"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_goblin_set_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_goblin_set_stamina",
+                          "variable": "stamina",
+                          "operator": "-=",
+                          "value": "10"
+                        },
+                        {
+                          "kind": "goto_scene",
+                          "id": "b_hd_goblin_goto",
+                          "sceneName": "goblin_cave",
+                          "label": ""
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_mine",
+                      "text": "[E★] Abandoned Mine — Cave Troll (Rec. STR 7+)",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "str_stat",
+                          "operator": ">=",
+                          "value": "7"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_mine_set_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_mine_set_stamina",
+                          "variable": "stamina",
+                          "operator": "-=",
+                          "value": "15"
+                        },
+                        {
+                          "kind": "goto_scene",
+                          "id": "b_hd_mine_goto",
+                          "sceneName": "abandoned_mine",
+                          "label": ""
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_ruins",
+                      "text": "[E★★] Forest Ruins — Ancient Sentinel (Rec. STR 9+)",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "str_stat",
+                          "operator": ">=",
+                          "value": "9"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_ruins_set_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_ruins_set_stamina",
+                          "variable": "stamina",
+                          "operator": "-=",
+                          "value": "20"
+                        },
+                        {
+                          "kind": "goto_scene",
+                          "id": "b_hd_ruins_goto",
+                          "sceneName": "forest_ruins",
+                          "label": ""
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_check_stats",
+                      "text": "Check your combat stats first",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_check_stats_para",
+                          "text": "COMBAT STATS\nSTR ${str_stat} | AGI ${agi_stat} | INT ${int_stat}\nVIT ${vit_stat} | END ${end_stat}\nHP: ${hp}/${max_hp}\nDungeons Cleared: ${dungeons_cleared}"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_leave_gate",
+                      "text": "Leave — not ready yet",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_hd_dungeon_goto_hub",
+                  "label": "district_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_hd_guild",
+              "text": "Visit the Guild Hall",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_guild_intro",
+                  "text": "The Hunters' Guild Hall is a converted office building buried under magical licensing notices and raid advertisements. The central board is crowded."
+                },
+                {
+                  "kind": "choice",
+                  "id": "b_hd_guild_choice",
+                  "options": [
+                    {
+                      "id": "opt_hd_guild_board",
+                      "text": "Check the raid recruitment board",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_guild_board_para",
+                          "text": "Most parties want D-rank or higher. One E-rank posting: 4-man party, equal shares, contact Yoon-H. You memorize it."
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_guild_board_set_rep",
+                          "variable": "reputation",
+                          "operator": "+=",
+                          "value": "1"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_guild_talk",
+                      "text": "Talk to other hunters",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": [
+                        {
+                          "kind": "if",
+                          "id": "b_hd_guild_talk_if",
+                          "branches": [
+                            {
+                              "id": "br_hd_guild_talk_rep_high",
+                              "conditionMode": "simple",
+                              "condition": {
+                                "variable": "reputation",
+                                "operator": ">=",
+                                "value": "2"
+                              },
+                              "conditionRaw": "",
+                              "blocks": [
+                                {
+                                  "kind": "paragraph",
+                                  "id": "b_hd_guild_talk_rep_high_para",
+                                  "text": "A few hunters recognize you from recent raids. The conversation flows easily — gate locations, party rates, tips. One leans in: 'You hear about that solo raider? S-rank, they say. Takes A-rank gates alone. Calls up shadows.' She shakes her head. 'Stay in your lane, right?'"
+                                }
+                              ]
+                            },
+                            {
+                              "id": "br_hd_guild_talk_rep_low",
+                              "conditionMode": "simple",
+                              "condition": null,
+                              "conditionRaw": "",
+                              "blocks": [
+                                {
+                                  "kind": "paragraph",
+                                  "id": "b_hd_guild_talk_rep_low_para",
+                                  "text": "Most hunters give you the size-up — find E-rank wanting — and turn back to their drinks. You're new. That changes with cleared dungeons."
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_guild_leave",
+                      "text": "Head back outside",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_hd_guild_goto_hub",
+                  "label": "district_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_hd_market",
+              "text": "Browse the Hunter Market",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_market_intro",
+                  "text": "The market occupies a covered alley behind the guild hall. Vendors sell everything from mana stones to enchanted gear."
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hd_market_if_potion",
+                  "branches": [
+                    {
+                      "id": "br_hd_market_has_potion",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "has_potion",
+                        "operator": "=",
+                        "value": "true"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_market_has_potion_para",
+                          "text": "You already have a health potion. The vendor gives a professional nod."
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_hd_market_no_potion",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_market_no_potion_para",
+                          "text": "The potion vendor flags you: 'E-rank starter potion, 30 gold. Best insurance you can buy before a gate.'"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "choice",
+                  "id": "b_hd_market_choice",
+                  "options": [
+                    {
+                      "id": "opt_hd_buy_pot",
+                      "text": "Buy a health potion [30g]",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "gold",
+                          "operator": ">=",
+                          "value": "30"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_buy_pot_gold",
+                          "variable": "gold",
+                          "operator": "-=",
+                          "value": "30"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_buy_pot_potion",
+                          "variable": "has_potion",
+                          "operator": "=",
+                          "value": "true"
+                        },
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_buy_pot_para",
+                          "text": "You hand over 30 gold. The red vial glows faintly — cheap but functional."
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_sell_info",
+                      "text": "Ask about selling mana stones",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_sell_info_para",
+                          "text": "'E-rank stones? Five gold each, firm price. They're common. Want volume, go to the Association.' You file the information."
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_market_leave",
+                      "text": "Leave the market",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_hd_market_goto_hub",
+                  "label": "district_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_hd_inn",
+              "text": "Rest at the hunter's inn [10g — recover stamina and HP]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "gold",
+                  "operator": ">=",
+                  "value": "10"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_hd_inn_gold",
+                  "variable": "gold",
+                  "operator": "-=",
+                  "value": "10"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_hd_inn_stamina",
+                  "variable": "stamina",
+                  "operator": "+=",
+                  "value": "50"
+                },
+                {
+                  "kind": "set",
+                  "id": "b_hd_inn_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "max_hp"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_inn_para",
+                  "text": "The inn is rows of cots in a converted warehouse, but the noise-canceling enchantment works. You sleep without dreaming. When you wake, the ache has faded. HP fully restored."
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_hd_inn_goto",
+                  "label": "district_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_hd_train",
+              "text": "Visit the Training Hall",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_train_intro",
+                  "text": "The training hall is a converted warehouse with mana-infused walls and impact-dampening floors. A grizzled instructor manages access. 'Gold or sweat. Either works.'"
+                },
+                {
+                  "kind": "choice",
+                  "id": "b_hd_train_choice",
+                  "options": [
+                    {
+                      "id": "opt_hd_tr_str",
+                      "text": "[20g] Strength Training [STR +1]",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "gold",
+                          "operator": ">=",
+                          "value": "20"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_str_gold",
+                          "variable": "gold",
+                          "operator": "-=",
+                          "value": "20"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_str_inc",
+                          "variable": "str_stat",
+                          "operator": "+=",
+                          "value": "1"
+                        },
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_tr_str_para",
+                          "text": "You work through the strength circuit under the instructor's eye. Weighted mana cores push your muscles to failure. When you leave, your attack form feels fundamentally crisper. STR is now ${str_stat}."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_hd_tr_str_goto",
+                          "label": "district_hub"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_tr_agi",
+                      "text": "[20g] Agility Drills [AGI +1]",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "gold",
+                          "operator": ">=",
+                          "value": "20"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_agi_gold",
+                          "variable": "gold",
+                          "operator": "-=",
+                          "value": "20"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_agi_inc",
+                          "variable": "agi_stat",
+                          "operator": "+=",
+                          "value": "1"
+                        },
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_tr_agi_para",
+                          "text": "Footwork patterns, evasion sequences, reaction drills against auto-targeting drones. Your body adapts. Each step becomes a calculation. AGI is now ${agi_stat}."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_hd_tr_agi_goto",
+                          "label": "district_hub"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_tr_int",
+                      "text": "[20g] Mana Circulation [INT +1]",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "gold",
+                          "operator": ">=",
+                          "value": "20"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_int_gold",
+                          "variable": "gold",
+                          "operator": "-=",
+                          "value": "20"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_int_inc",
+                          "variable": "int_stat",
+                          "operator": "+=",
+                          "value": "1"
+                        },
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_tr_int_para",
+                          "text": "Slow, precise breathing patterns that force mana through specific channels. Three hours later, your pathways feel noticeably wider. INT is now ${int_stat}."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_hd_tr_int_goto",
+                          "label": "district_hub"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_tr_vit",
+                      "text": "[20g] Body Conditioning [VIT +1, HP up]",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "gold",
+                          "operator": ">=",
+                          "value": "20"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_vit_gold",
+                          "variable": "gold",
+                          "operator": "-=",
+                          "value": "20"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_vit_inc",
+                          "variable": "vit_stat",
+                          "operator": "+=",
+                          "value": "1"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_vit_maxhp",
+                          "variable": "max_hp",
+                          "operator": "=",
+                          "value": "(vit_stat * 10)"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_vit_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        },
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_tr_vit_para",
+                          "text": "Endurance circuits and impact resistance drills. 'Your vitals are thicker,' the instructor notes. VIT is now ${vit_stat}. Max HP: ${max_hp}."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_hd_tr_vit_goto",
+                          "label": "district_hub"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_tr_end",
+                      "text": "[25 Stamina] Outdoor Endurance Run [END +1, free]",
+                      "conditionMode": "simple",
+                      "conditions": [
+                        {
+                          "variable": "stamina",
+                          "operator": ">=",
+                          "value": "25"
+                        }
+                      ],
+                      "conditionRaw": "",
+                      "visibility": "selectable_if",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_end_stamina",
+                          "variable": "stamina",
+                          "operator": "-=",
+                          "value": "25"
+                        },
+                        {
+                          "kind": "set",
+                          "id": "b_hd_tr_end_inc",
+                          "variable": "end_stat",
+                          "operator": "+=",
+                          "value": "1"
+                        },
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_tr_end_para",
+                          "text": "Twelve laps around the district perimeter in weighted gear. Brutally simple. Your recovery rate improves. END is now ${end_stat}."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_hd_tr_end_goto",
+                          "label": "district_hub"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "opt_hd_tr_leave",
+                      "text": "Leave the training hall",
+                      "conditionMode": "simple",
+                      "conditions": [],
+                      "conditionRaw": "",
+                      "visibility": "if",
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_hd_train_goto_hub",
+                  "label": "district_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_hd_status",
+              "text": "Check your Status Window",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "comment",
+                  "id": "b_hd_status_comment",
+                  "text": "Status window — shows live stats via variable interpolation"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_status_para",
+                  "text": "You focus inward, calling up the blue interface all awakened can access."
+                },
+                {
+                  "kind": "stat_chart",
+                  "id": "b_hd_status_chart",
+                  "title": "Status Window — Kim Jae-won (E-Rank)",
+                  "entries": [
+                    {
+                      "id": "sce_hw_str",
+                      "display": "text",
+                      "variable": "str_stat",
+                      "label": "STR — Strength"
+                    },
+                    {
+                      "id": "sce_hw_agi",
+                      "display": "text",
+                      "variable": "agi_stat",
+                      "label": "AGI — Agility"
+                    },
+                    {
+                      "id": "sce_hw_int",
+                      "display": "text",
+                      "variable": "int_stat",
+                      "label": "INT — Intelligence"
+                    },
+                    {
+                      "id": "sce_hw_vit",
+                      "display": "text",
+                      "variable": "vit_stat",
+                      "label": "VIT — Vitality"
+                    },
+                    {
+                      "id": "sce_hw_end",
+                      "display": "text",
+                      "variable": "end_stat",
+                      "label": "END — Endurance"
+                    },
+                    {
+                      "id": "sce_hw_hp",
+                      "display": "percent",
+                      "variable": "hp",
+                      "maxVariable": "max_hp",
+                      "label": "HP"
+                    },
+                    {
+                      "id": "sce_hw_gold",
+                      "display": "text",
+                      "variable": "gold",
+                      "label": "Gold"
+                    },
+                    {
+                      "id": "sce_hw_rep",
+                      "display": "text",
+                      "variable": "reputation",
+                      "label": "Reputation"
+                    },
+                    {
+                      "id": "sce_hw_clr",
+                      "display": "text",
+                      "variable": "dungeons_cleared",
+                      "label": "Dungeons Cleared"
+                    }
+                  ]
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hd_status_if_rep",
+                  "branches": [
+                    {
+                      "id": "br_hd_status_rep_high",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "reputation",
+                        "operator": ">=",
+                        "value": "3"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_status_rep_high_para",
+                          "text": "[FIELD NOTE: Other hunters have flagged you as reliable. Party invite rate improving.]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_hd_status_goto_hub",
+                  "label": "district_hub"
+                }
+              ]
+            },
+            {
+              "id": "opt_hd_endday",
+              "text": "Call it a day and head home",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_hd_endday_days",
+                  "variable": "days_active",
+                  "operator": "+=",
+                  "value": "1"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_hd_endday_para",
+                  "text": "The sun dips behind the Seoul skyline. You shoulder your pack and head back to your rented room.\n\nDay ${days_active} done. Dungeons cleared: ${dungeons_cleared}. Gold: ${gold}g."
+                },
+                {
+                  "kind": "if",
+                  "id": "b_hd_endday_if",
+                  "branches": [
+                    {
+                      "id": "br_hd_endday_win",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "dungeons_cleared",
+                        "operator": ">=",
+                        "value": "3"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_hd_endday_win_para",
+                          "text": "Three dungeons cleared. Your status window shows a notification: [PROMOTION EVALUATION ELIGIBLE — apply for D-rank testing]. A gate-runner nobody who cleared three E-rank gates in a week. You close the window. The road is long.\n\nBut you're on it."
+                        },
+                        {
+                          "kind": "ending",
+                          "id": "b_hd_endday_ending"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_hd_endday_continue",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "finish",
+                          "id": "b_hd_endday_finish"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sc_goblin_cave",
+      "filename": "goblin_cave",
+      "title": "E-Rank: Goblin Cave",
+      "blocks": [
+        {
+          "kind": "comment",
+          "id": "b_gc_comment",
+          "text": "Goblin Cave — E-rank combat. Enemy HP: 30, Enemy ATK: 5/round"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_gc_intro",
+          "text": "The gate closes behind you into a damp cave system lit by clusters of bioluminescent fungus. The air smells of wet stone and iron.\n\nAhead: a pack of three goblins — small, fast, armed with crude blades. Standard E-rank fodder. They spot you immediately."
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_set_ehp",
+          "variable": "enemy_hp",
+          "operator": "=",
+          "value": "30"
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_set_round",
+          "variable": "combat_round",
+          "operator": "=",
+          "value": "0"
+        },
+        {
+          "kind": "label",
+          "id": "b_gc_label_fight",
+          "name": "goblin_fight"
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_inc_round",
+          "variable": "combat_round",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_gc_round_para",
+          "text": "── Round ${combat_round} ──\nGoblin Pack HP: ${enemy_hp}/30   Your HP: ${hp}/${max_hp}\n\nThe goblins circle you, watching for an opening."
+        },
+        {
+          "kind": "choice",
+          "id": "b_gc_choice",
+          "options": [
+            {
+              "id": "opt_gc_strike",
+              "text": "Strike! [Deals ${str_stat}×2 damage]",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_gc_strike_dmg",
+                  "variable": "enemy_hp",
+                  "operator": "=",
+                  "value": "(enemy_hp - (str_stat * 2))"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_gc_strike_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_gc_strike_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "enemy_hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_gc_strike_dead_para",
+                          "text": "Your strike drops the last goblin. The pack collapses. The Gate crystalizes."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_gc_strike_dead_goto",
+                          "label": "goblin_victory"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_gc_strike_alive",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_gc_strike_alive_para",
+                          "text": "Your blade connects. The goblins screech and slash back."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "set",
+                  "id": "b_gc_strike_take_dmg",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp - 5)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_gc_strike_if_dead2",
+                  "branches": [
+                    {
+                      "id": "br_gc_strike_player_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_gc_strike_player_dead_para",
+                          "text": "The goblins' blades find their mark one too many times. The lights go out."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_gc_strike_player_dead_goto",
+                          "label": "goblin_defeat"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_gc_strike_loop",
+                  "label": "goblin_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_gc_dodge",
+              "text": "Dodge and Counterattack [AGI bonus, no damage taken]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "agi_stat",
+                  "operator": ">=",
+                  "value": "6"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_gc_dodge_para",
+                  "text": "Your footwork carries you past their swing. You counter while they're off-balance."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_gc_dodge_dmg",
+                  "variable": "enemy_hp",
+                  "operator": "=",
+                  "value": "(enemy_hp - (str_stat + agi_stat))"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_gc_dodge_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_gc_dodge_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "enemy_hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_gc_dodge_dead_para",
+                          "text": "The counterattack drops the goblin pack completely. Clean and efficient."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_gc_dodge_dead_goto",
+                          "label": "goblin_victory"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_gc_dodge_loop",
+                  "label": "goblin_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_gc_potion",
+              "text": "Drink Health Potion [+30 HP]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "true"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_gc_potion_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp + 30)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_gc_potion_if_cap",
+                  "branches": [
+                    {
+                      "id": "br_gc_potion_cap",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": ">",
+                        "value": "max_hp"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_gc_potion_cap_set",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "set",
+                  "id": "b_gc_potion_clear",
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "false"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_gc_potion_para",
+                  "text": "You down the potion. Red warmth restores your strength. HP: ${hp}/${max_hp}."
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_gc_potion_loop",
+                  "label": "goblin_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_gc_retreat",
+              "text": "Retreat from the dungeon",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_gc_retreat_para",
+                  "text": "You back toward the gate, taking a parting slash. The gate closes behind you."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_gc_retreat_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp - 8)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_gc_retreat_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_gc_retreat_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_gc_retreat_min_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto_scene",
+                  "id": "b_gc_retreat_goto",
+                  "sceneName": "hunter_district",
+                  "label": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "label",
+          "id": "b_gc_label_victory",
+          "name": "goblin_victory"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_gc_victory_para",
+          "text": "[CLEAR: Goblin Cave]\n+20g   +1 Reputation   +1 Dungeon Cleared\n\nThe dungeon dissolves. You collect mana stones and a pouch of gold."
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_victory_gold",
+          "variable": "gold",
+          "operator": "+=",
+          "value": "20"
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_victory_rep",
+          "variable": "reputation",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_victory_dungeons",
+          "variable": "dungeons_cleared",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_victory_stamina",
+          "variable": "stamina",
+          "operator": "-=",
+          "value": "20"
+        },
+        {
+          "kind": "if",
+          "id": "b_gc_victory_if_rep",
+          "branches": [
+            {
+              "id": "br_gc_victory_rep_high",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "reputation",
+                "operator": ">=",
+                "value": "3"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_gc_victory_rep_high_para",
+                  "text": "A veteran hunter near the exit gives you a nod. 'Clean work.' Word travels in the district."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_gc_victory_goto",
+          "sceneName": "hunter_district",
+          "label": ""
+        },
+        {
+          "kind": "label",
+          "id": "b_gc_label_defeat",
+          "name": "goblin_defeat"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_gc_defeat_para",
+          "text": "You wake up outside the gate, patched up by the on-site medic. 10 gold for treatment.\n\n[FAILED: Goblin Cave]\n\nThe goblins were faster than expected. You file the lesson under 'expensive'."
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_defeat_hp",
+          "variable": "hp",
+          "operator": "=",
+          "value": "max_hp"
+        },
+        {
+          "kind": "set",
+          "id": "b_gc_defeat_gold",
+          "variable": "gold",
+          "operator": "-=",
+          "value": "10"
+        },
+        {
+          "kind": "if",
+          "id": "b_gc_defeat_if_gold",
+          "branches": [
+            {
+              "id": "br_gc_defeat_gold_neg",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "gold",
+                "operator": "<",
+                "value": "0"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_gc_defeat_gold_zero",
+                  "variable": "gold",
+                  "operator": "=",
+                  "value": "0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_gc_defeat_goto",
+          "sceneName": "hunter_district",
+          "label": ""
+        }
+      ]
+    },
+    {
+      "id": "sc_abandoned_mine",
+      "filename": "abandoned_mine",
+      "title": "E-Rank★: Abandoned Mine",
+      "blocks": [
+        {
+          "kind": "comment",
+          "id": "b_am_comment",
+          "text": "Abandoned Mine — Cave Troll. Enemy HP: 55, Enemy ATK: 12/round. Recommended STR 7+"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_am_intro",
+          "text": "The gate opens into a cramped shaft system. Air thick with iron dust. Torch light flickers off exposed ore veins.\n\nAt the bottom: a Cave Troll — three meters tall, stone-grey hide hardened by decades underground. One hit could cave in your ribs. You're going to need to be smart."
+        },
+        {
+          "kind": "set",
+          "id": "b_am_set_ehp",
+          "variable": "enemy_hp",
+          "operator": "=",
+          "value": "55"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_set_round",
+          "variable": "combat_round",
+          "operator": "=",
+          "value": "0"
+        },
+        {
+          "kind": "label",
+          "id": "b_am_label_fight",
+          "name": "troll_fight"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_inc_round",
+          "variable": "combat_round",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_am_round_para",
+          "text": "── Round ${combat_round} ──\nCave Troll HP: ${enemy_hp}/55   Your HP: ${hp}/${max_hp}\n\nThe troll raises a fist like a wrecking ball."
+        },
+        {
+          "kind": "choice",
+          "id": "b_am_choice",
+          "options": [
+            {
+              "id": "opt_am_strike",
+              "text": "Strike! [Deals ${str_stat}×2 damage]",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_am_strike_dmg",
+                  "variable": "enemy_hp",
+                  "operator": "=",
+                  "value": "(enemy_hp - (str_stat * 2))"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_am_strike_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_am_strike_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "enemy_hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_am_strike_dead_para",
+                          "text": "A final blow across the troll's temple drops it. The cavern shakes."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_am_strike_dead_goto",
+                          "label": "troll_victory"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_am_strike_alive",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_am_strike_alive_para",
+                          "text": "Your blade bites into thick hide. It roars and swings back."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "set",
+                  "id": "b_am_strike_take_dmg",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp - 12)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_am_strike_if_dead2",
+                  "branches": [
+                    {
+                      "id": "br_am_strike_player_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_am_strike_player_dead_para",
+                          "text": "The troll's fist connects. You hit the cavern wall and the lights go out."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_am_strike_player_dead_goto",
+                          "label": "troll_defeat"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_am_strike_loop",
+                  "label": "troll_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_am_dodge",
+              "text": "Exploit weak joint [AGI bonus attack, no damage]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "agi_stat",
+                  "operator": ">=",
+                  "value": "7"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_am_dodge_para",
+                  "text": "You slip under the swing and drive your blade into the troll's unprotected knee joint."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_am_dodge_dmg",
+                  "variable": "enemy_hp",
+                  "operator": "=",
+                  "value": "(enemy_hp - (str_stat + agi_stat))"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_am_dodge_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_am_dodge_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "enemy_hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_am_dodge_dead_para",
+                          "text": "The joint strike destabilizes the troll. It crumbles."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_am_dodge_dead_goto",
+                          "label": "troll_victory"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_am_dodge_loop",
+                  "label": "troll_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_am_potion",
+              "text": "Drink Health Potion [+30 HP]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "true"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_am_potion_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp + 30)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_am_potion_if_cap",
+                  "branches": [
+                    {
+                      "id": "br_am_potion_cap",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": ">",
+                        "value": "max_hp"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_am_potion_cap_set",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "set",
+                  "id": "b_am_potion_clear",
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "false"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_am_potion_para",
+                  "text": "You slam the potion. The troll watches with something like contempt. HP: ${hp}/${max_hp}."
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_am_potion_loop",
+                  "label": "troll_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_am_retreat",
+              "text": "Retreat from the mine",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_am_retreat_para",
+                  "text": "You sprint back toward the gate. The troll's roar echoes after you. You take a glancing blow."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_am_retreat_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp - 15)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_am_retreat_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_am_retreat_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_am_retreat_min_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto_scene",
+                  "id": "b_am_retreat_goto",
+                  "sceneName": "hunter_district",
+                  "label": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "label",
+          "id": "b_am_label_victory",
+          "name": "troll_victory"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_am_victory_para",
+          "text": "[CLEAR: Abandoned Mine ★]\n+40g   +2 Reputation   +1 Dungeon Cleared\n\nThe troll collapses and the dungeon crystallizes. You find a Troll Core — a dense mana stone worth extra to the Association."
+        },
+        {
+          "kind": "set",
+          "id": "b_am_victory_gold",
+          "variable": "gold",
+          "operator": "+=",
+          "value": "40"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_victory_rep",
+          "variable": "reputation",
+          "operator": "+=",
+          "value": "2"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_victory_dungeons",
+          "variable": "dungeons_cleared",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_victory_stamina",
+          "variable": "stamina",
+          "operator": "-=",
+          "value": "30"
+        },
+        {
+          "kind": "if",
+          "id": "b_am_victory_if_rep",
+          "branches": [
+            {
+              "id": "br_am_victory_rep_high",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "reputation",
+                "operator": ">=",
+                "value": "5"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_am_victory_rep_high_para",
+                  "text": "Two hunters waiting outside stare. 'You solo'd the mine? What rank — D?' You show your E badge. Their expressions are worth more than the gold."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_am_victory_goto",
+          "sceneName": "hunter_district",
+          "label": ""
+        },
+        {
+          "kind": "label",
+          "id": "b_am_label_defeat",
+          "name": "troll_defeat"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_am_defeat_para",
+          "text": "The medic patches you up. Twelve gold for treatment.\n\n[FAILED: Abandoned Mine ★]\n\n'The troll will still be there tomorrow,' she says. 'If you want another try.'"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_defeat_hp",
+          "variable": "hp",
+          "operator": "=",
+          "value": "max_hp"
+        },
+        {
+          "kind": "set",
+          "id": "b_am_defeat_gold",
+          "variable": "gold",
+          "operator": "-=",
+          "value": "12"
+        },
+        {
+          "kind": "if",
+          "id": "b_am_defeat_if_gold",
+          "branches": [
+            {
+              "id": "br_am_defeat_gold_neg",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "gold",
+                "operator": "<",
+                "value": "0"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_am_defeat_gold_zero",
+                  "variable": "gold",
+                  "operator": "=",
+                  "value": "0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_am_defeat_goto",
+          "sceneName": "hunter_district",
+          "label": ""
+        }
+      ]
+    },
+    {
+      "id": "sc_forest_ruins",
+      "filename": "forest_ruins",
+      "title": "E-Rank★★: Forest Ruins",
+      "blocks": [
+        {
+          "kind": "comment",
+          "id": "b_fr_comment",
+          "text": "Forest Ruins — Ancient Sentinel. Enemy HP: 80, Enemy ATK: 18/round. Recommended STR 9+"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_fr_intro",
+          "text": "The Forest Ruins gate deposits you in the remains of an ancient structure half-consumed by aggressive forest growth. Vines pry apart flagstones. Moss blankets crumbling arches.\n\nAt the center stands an Ancient Sentinel — a construct of carved stone and compressed mana, moving with eerie mechanical precision. Its eye-slots glow amber. The Association marks this as the hardest E-rank gate in the district. Only eight hunters cleared it solo this quarter.\n\nYou're about to find out why."
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_set_ehp",
+          "variable": "enemy_hp",
+          "operator": "=",
+          "value": "80"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_set_round",
+          "variable": "combat_round",
+          "operator": "=",
+          "value": "0"
+        },
+        {
+          "kind": "label",
+          "id": "b_fr_label_fight",
+          "name": "sentinel_fight"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_inc_round",
+          "variable": "combat_round",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_fr_round_para",
+          "text": "── Round ${combat_round} ──\nAncient Sentinel HP: ${enemy_hp}/80   Your HP: ${hp}/${max_hp}\n\nThe Sentinel pivots, targeting systems tracking your movement."
+        },
+        {
+          "kind": "choice",
+          "id": "b_fr_choice",
+          "options": [
+            {
+              "id": "opt_fr_strike",
+              "text": "Strike! [Deals ${str_stat}×2 damage]",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_fr_strike_dmg",
+                  "variable": "enemy_hp",
+                  "operator": "=",
+                  "value": "(enemy_hp - (str_stat * 2))"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_fr_strike_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_fr_strike_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "enemy_hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_fr_strike_dead_para",
+                          "text": "A focused strike at the core gem. It cracks. The Sentinel's glow dies and it crumbles into inert stone."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_fr_strike_dead_goto",
+                          "label": "sentinel_victory"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_fr_strike_alive",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_fr_strike_alive_para",
+                          "text": "Your blade chips stone from the Sentinel's armor. It raises one massive arm and drives it down."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "set",
+                  "id": "b_fr_strike_take_dmg",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp - 18)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_fr_strike_if_dead2",
+                  "branches": [
+                    {
+                      "id": "br_fr_strike_player_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_fr_strike_player_dead_para",
+                          "text": "The Sentinel's strike hits like a falling building. You're thrown thirty feet. The amber glow fades."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_fr_strike_player_dead_goto",
+                          "label": "sentinel_defeat"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_fr_strike_loop",
+                  "label": "sentinel_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_fr_core_strike",
+              "text": "Target the core gem [AGI + STR + 5 bonus damage, no retaliation]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "agi_stat",
+                  "operator": ">=",
+                  "value": "8"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_fr_core_strike_para",
+                  "text": "You track the Sentinel's attack pattern. There — a gap in its rotation. You drive your blade at the core gem."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_fr_core_strike_dmg",
+                  "variable": "enemy_hp",
+                  "operator": "=",
+                  "value": "(enemy_hp - (str_stat + agi_stat + 5))"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_fr_core_strike_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_fr_core_strike_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "enemy_hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_fr_core_strike_dead_para",
+                          "text": "The gem shatters. The Sentinel stops mid-swing, stands still for one second, then collapses in pieces."
+                        },
+                        {
+                          "kind": "goto",
+                          "id": "b_fr_core_strike_dead_goto",
+                          "label": "sentinel_victory"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "br_fr_core_strike_alive",
+                      "conditionMode": "simple",
+                      "condition": null,
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "paragraph",
+                          "id": "b_fr_core_strike_alive_para",
+                          "text": "The core cracks but holds. The Sentinel recalibrates with increased aggression."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_fr_core_strike_loop",
+                  "label": "sentinel_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_fr_potion",
+              "text": "Drink Health Potion [+30 HP]",
+              "conditionMode": "simple",
+              "conditions": [
+                {
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "true"
+                }
+              ],
+              "conditionRaw": "",
+              "visibility": "selectable_if",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_fr_potion_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp + 30)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_fr_potion_if_cap",
+                  "branches": [
+                    {
+                      "id": "br_fr_potion_cap",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": ">",
+                        "value": "max_hp"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_fr_potion_cap_set",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "max_hp"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "set",
+                  "id": "b_fr_potion_clear",
+                  "variable": "has_potion",
+                  "operator": "=",
+                  "value": "false"
+                },
+                {
+                  "kind": "paragraph",
+                  "id": "b_fr_potion_para",
+                  "text": "You drink the potion during a brief reset in the Sentinel's movement cycle. HP: ${hp}/${max_hp}."
+                },
+                {
+                  "kind": "goto",
+                  "id": "b_fr_potion_loop",
+                  "label": "sentinel_fight"
+                }
+              ]
+            },
+            {
+              "id": "opt_fr_retreat",
+              "text": "Retreat from the ruins",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_fr_retreat_para",
+                  "text": "You run. The Sentinel doesn't pursue past the ruin boundary. You exit bloody and humbled."
+                },
+                {
+                  "kind": "set",
+                  "id": "b_fr_retreat_hp",
+                  "variable": "hp",
+                  "operator": "=",
+                  "value": "(hp - 20)"
+                },
+                {
+                  "kind": "if",
+                  "id": "b_fr_retreat_if_dead",
+                  "branches": [
+                    {
+                      "id": "br_fr_retreat_dead",
+                      "conditionMode": "simple",
+                      "condition": {
+                        "variable": "hp",
+                        "operator": "<=",
+                        "value": "0"
+                      },
+                      "conditionRaw": "",
+                      "blocks": [
+                        {
+                          "kind": "set",
+                          "id": "b_fr_retreat_min_hp",
+                          "variable": "hp",
+                          "operator": "=",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "goto_scene",
+                  "id": "b_fr_retreat_goto",
+                  "sceneName": "hunter_district",
+                  "label": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "label",
+          "id": "b_fr_label_victory",
+          "name": "sentinel_victory"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_fr_victory_para",
+          "text": "[CLEAR: Forest Ruins ★★]\n+70g   +3 Reputation   +1 Dungeon Cleared\n\nThe Sentinel's core gem alone is worth 40g to the Mana Research Bureau. The Association pings you immediately: someone wants to know the name of the E-rank who just cleared the ruins."
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_victory_gold",
+          "variable": "gold",
+          "operator": "+=",
+          "value": "70"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_victory_rep",
+          "variable": "reputation",
+          "operator": "+=",
+          "value": "3"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_victory_dungeons",
+          "variable": "dungeons_cleared",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_victory_stamina",
+          "variable": "stamina",
+          "operator": "-=",
+          "value": "40"
+        },
+        {
+          "kind": "if",
+          "id": "b_fr_victory_if_dungeons",
+          "branches": [
+            {
+              "id": "br_fr_victory_dungeons_3",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "dungeons_cleared",
+                "operator": ">=",
+                "value": "3"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "id": "b_fr_victory_dungeons_3_para",
+                  "text": "Your hunter record shows three cleared dungeons. The Association system flags it automatically: [PROMOTION EVALUATION ELIGIBLE — apply for D-rank testing]. Your phone buzzes. For the first time since your rank assessment, something feels genuinely different."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_fr_victory_goto",
+          "sceneName": "hunter_district",
+          "label": ""
+        },
+        {
+          "kind": "label",
+          "id": "b_fr_label_defeat",
+          "name": "sentinel_defeat"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_fr_defeat_para",
+          "text": "The Association emergency extraction system pulls you out before the Sentinel finishes it. You wake up in the infirmary.\n\n'Twenty gold for extraction and medical,' the clerk says flatly.\n\n[FAILED: Forest Ruins ★★]"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_defeat_hp",
+          "variable": "hp",
+          "operator": "=",
+          "value": "max_hp"
+        },
+        {
+          "kind": "set",
+          "id": "b_fr_defeat_gold",
+          "variable": "gold",
+          "operator": "-=",
+          "value": "20"
+        },
+        {
+          "kind": "if",
+          "id": "b_fr_defeat_if_gold",
+          "branches": [
+            {
+              "id": "br_fr_defeat_gold_neg",
+              "conditionMode": "simple",
+              "condition": {
+                "variable": "gold",
+                "operator": "<",
+                "value": "0"
+              },
+              "conditionRaw": "",
+              "blocks": [
+                {
+                  "kind": "set",
+                  "id": "b_fr_defeat_gold_zero",
+                  "variable": "gold",
+                  "operator": "=",
+                  "value": "0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_fr_defeat_goto",
+          "sceneName": "hunter_district",
+          "label": ""
+        }
+      ]
+    }
+  ]
+}
