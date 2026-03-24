@@ -119,21 +119,24 @@ function buildImportReportText(input: {
 }
 
 export default function TopBar({ viewMode, onSetView }: TopBarProps) {
-  const { project, setProjectMeta, loadProject, undo, redo } = useProjectStore();
+  const project = useProjectStore(s => s.project);
+  const revision = useProjectStore(s => s.revision);
+  const setProjectMeta = useProjectStore(s => s.setProjectMeta);
+  const loadProject = useProjectStore(s => s.loadProject);
+  const undo = useProjectStore(s => s.undo);
+  const redo = useProjectStore(s => s.redo);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const openMenuRef = useRef<HTMLDivElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const [currentFileName, setCurrentFileName] = useState(suggestedProjectFileName(project));
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
-  const [isDirty, setIsDirty] = useState(false);
+  const [savedRevision, setSavedRevision] = useState(revision);
   const [openMenuOpen, setOpenMenuOpen] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const activeHandleRef = useRef<FileHandleLike | null>(null);
-  const lastSavedSnapshotRef = useRef<string>(JSON.stringify(project));
+  const isDirty = revision !== savedRevision;
 
   useEffect(() => {
-    const currentSnapshot = JSON.stringify(project);
-    setIsDirty(currentSnapshot !== lastSavedSnapshotRef.current);
     if (!activeHandleRef.current) {
       setCurrentFileName(suggestedProjectFileName(project));
     }
@@ -156,14 +159,13 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
     }
   }
 
-  function markSaved(snapshot: string, fileName: string) {
-    lastSavedSnapshotRef.current = snapshot;
+  function markSaved(fileName: string) {
     setCurrentFileName(fileName);
     setLastSavedAt(Date.now());
-    setIsDirty(false);
+    setSavedRevision(useProjectStore.getState().revision);
   }
 
-  const downloadJson = useCallback((snapshot: string) => {
+  const downloadJson = useCallback(() => {
     const json = JSON.stringify(project, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -172,11 +174,10 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
     a.download = suggestedProjectFileName(project);
     a.click();
     URL.revokeObjectURL(url);
-    markSaved(snapshot, a.download);
+    markSaved(a.download);
   }, [project]);
 
   const saveProject = useCallback(async (saveAs: boolean) => {
-    const snapshot = JSON.stringify(project);
     const snapshotPretty = JSON.stringify(project, null, 2);
     const pickerWindow = window as FilePickerWindow;
 
@@ -192,7 +193,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
         const writable = await handle.createWritable();
         await writable.write(snapshotPretty);
         await writable.close();
-        markSaved(snapshot, handle.name);
+        markSaved(handle.name);
         return;
       }
 
@@ -206,11 +207,11 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
         const writable = await handle.createWritable();
         await writable.write(snapshotPretty);
         await writable.close();
-        markSaved(snapshot, handle.name);
+        markSaved(handle.name);
         return;
       }
 
-      downloadJson(snapshot);
+      downloadJson();
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       alert("Save failed. Please try Save As or download JSON.");
@@ -226,7 +227,7 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
       }
       loadProject(parsed);
       activeHandleRef.current = handle;
-      markSaved(JSON.stringify(parsed), fileName);
+      markSaved(fileName);
     } catch {
       alert("Invalid project file.");
     }
@@ -274,10 +275,9 @@ export default function TopBar({ viewMode, onSetView }: TopBarProps) {
       const { project: imported, warnings, report } = importChoiceScriptFromFiles(files);
       loadProject(imported);
       activeHandleRef.current = null;
-      lastSavedSnapshotRef.current = JSON.stringify(imported);
       setCurrentFileName(suggestedProjectFileName(imported));
       setLastSavedAt(Date.now());
-      setIsDirty(false);
+      setSavedRevision(useProjectStore.getState().revision);
 
       alert(buildImportReportText({
         fileCount: report.sourceTextFileCount,

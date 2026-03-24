@@ -56,6 +56,7 @@ function defaultProject(): GameProject {
 interface ProjectState {
   project: GameProject;
   activeSceneId: string;
+  revision: number;
   history: GameProject[];
   historyIndex: number;
 
@@ -110,6 +111,7 @@ interface ProjectState {
 }
 
 function pushHistory(state: ProjectState, snapshot: GameProject) {
+  state.revision += 1;
   // Trim forward history
   state.history = state.history.slice(0, state.historyIndex + 1);
   state.history.push(JSON.parse(JSON.stringify(snapshot)));
@@ -128,6 +130,7 @@ export const useProjectStore = create<ProjectState>()(
   immer((set) => ({
     project: defaultProject(),
     activeSceneId: "",
+    revision: 0,
     history: [],
     historyIndex: -1,
 
@@ -382,6 +385,7 @@ export const useProjectStore = create<ProjectState>()(
     loadProject: (project) => set(state => {
       state.project = project;
       state.activeSceneId = project.scenes[0]?.id ?? "";
+      state.revision += 1;
       state.history = [];
       state.historyIndex = -1;
     }),
@@ -402,10 +406,12 @@ export const useProjectStore = create<ProjectState>()(
 
     updateNodePositions: (positions) => set(state => {
       state.project.nodePositions = { ...(state.project.nodePositions ?? {}), ...positions };
+      state.revision += 1;
     }),
 
     updateExportStyle: (style) => set(state => {
       state.project.exportStyle = style;
+      state.revision += 1;
     }),
   }))
 );
