@@ -1,6 +1,7 @@
 import type { Block } from "../../types";
 import { useProjectStore } from "../../store/projectStore";
 import ParagraphBlockEditor from "./blocks/ParagraphBlockEditor";
+import ImageBlockEditor from "./blocks/ImageBlockEditor";
 import ChoiceBlockEditor from "./blocks/ChoiceBlockEditor";
 import IfBlockEditor from "./blocks/IfBlockEditor";
 import SetBlockEditor from "./blocks/SetBlockEditor";
@@ -20,7 +21,7 @@ interface Props {
 }
 
 // These block kinds render their editor inline in the row (single-line)
-const INLINE_KINDS = new Set(["set", "goto", "goto_scene", "label", "finish", "ending", "comment"]);
+const INLINE_KINDS = new Set(["image", "set", "goto", "goto_scene", "label", "finish", "ending", "comment"]);
 
 export default function BlockItem({ sceneId, blockPath, block, index, nestLevel }: Props) {
   const { deleteBlock, moveBlock } = useProjectStore();
@@ -56,6 +57,8 @@ export default function BlockItem({ sceneId, blockPath, block, index, nestLevel 
     switch (block.kind) {
       case "paragraph":
         return <ParagraphBlockEditor sceneId={sceneId} blockPath={blockFullPath} block={block} />;
+      case "image":
+        return <ImageBlockEditor sceneId={sceneId} blockPath={blockFullPath} block={block} />;
       case "choice":
         return <ChoiceBlockEditor sceneId={sceneId} blockPath={blockFullPath} block={block} nestLevel={nestLevel} />;
       case "if":

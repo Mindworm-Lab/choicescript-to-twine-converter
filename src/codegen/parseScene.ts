@@ -196,6 +196,17 @@ function parseBlocksAtLevel(cursor: ParseCursor, level: number): Block[] {
       continue;
     }
 
+    if (trimmed.startsWith("*image ")) {
+      const rest = trimmed.slice(7).trim();
+      const parts = rest.split(/\s+/);
+      const src = parts[0] ?? "";
+      const alignRaw = parts[1] ?? "none";
+      const align = ["left", "right", "center"].includes(alignRaw) ? alignRaw as "left" | "right" | "center" : "none";
+      blocks.push({ kind: "image", id: nanoid(), src, align });
+      cursor.pos++;
+      continue;
+    }
+
     if (trimmed.startsWith("*label ")) {
       blocks.push({ kind: "label", id: nanoid(), name: trimmed.slice(7).trim() });
       cursor.pos++;

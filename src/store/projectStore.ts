@@ -414,6 +414,7 @@ function createBlock(kind: Block["kind"]): Block {
   const id = nanoid();
   switch (kind) {
     case "paragraph": return { kind, id, text: "" };
+    case "image": return { kind, id, src: "", align: "center" };
     case "choice": return { kind, id, options: [] };
     case "if": return {
       kind, id, branches: [

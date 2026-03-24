@@ -47,6 +47,7 @@ export type Variable = {
 
 export type Block =
   | { kind: "paragraph"; id: string; text: string }
+  | { kind: "image"; id: string; src: string; align: "left" | "right" | "center" | "none" }
   | { kind: "choice"; id: string; options: ChoiceOption[] }
   | { kind: "if"; id: string; branches: IfBranch[] }
   | { kind: "set"; id: string; variable: string; operator: "=" | "+=" | "-=" | "*=" | "/="; value: string }

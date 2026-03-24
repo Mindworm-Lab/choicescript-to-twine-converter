@@ -5,6 +5,7 @@ import styles from "./BlockEditor.module.css";
 
 const BLOCK_TYPES: { kind: BlockKind; label: string }[] = [
   { kind: "paragraph", label: "Paragraph" },
+  { kind: "image", label: "Image" },
   { kind: "choice", label: "Choice" },
   { kind: "if", label: "If/Else" },
   { kind: "set", label: "Set Variable" },

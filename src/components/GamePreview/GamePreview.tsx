@@ -16,8 +16,12 @@ interface StatEntry {
 
 interface OutputItem {
   id: string;
-  type: "text" | "scene_change" | "hr" | "stat_chart";
+  type: "text" | "scene_change" | "hr" | "stat_chart" | "image";
   text?: string;
+  image?: {
+    src: string;
+    align: "left" | "right" | "center" | "none";
+  };
   statChart?: {
     title: string;
     entries: StatEntry[];
@@ -241,6 +245,20 @@ function stepOnce(state: GameState, project: GameProject): GameState {
       };
     }
 
+    case "image": {
+      if (!block.src.trim()) return { ...state, pendingBlocks: rest, stepCount: state.stepCount + 1 };
+      return {
+        ...state,
+        pendingBlocks: rest,
+        output: [...state.output, {
+          id: nanoid(),
+          type: "image",
+          image: { src: block.src, align: block.align },
+        }],
+        stepCount: state.stepCount + 1,
+      };
+    }
+
     case "comment":
     case "label":
       return { ...state, pendingBlocks: rest, stepCount: state.stepCount + 1 };
@@ -419,6 +437,13 @@ export default function GamePreview({ exportStyle, showSidebar = false }: GamePr
         {state.output.map(item => {
           if (item.type === "hr") return <hr key={item.id} className={styles.sceneBreak} />;
           if (item.type === "scene_change") return <div key={item.id} className={styles.sceneLabel}>{item.text}</div>;
+          if (item.type === "image" && item.image) {
+            return (
+              <div key={item.id} className={`${styles.imageWrap} ${styles[`imageAlign${item.image.align[0].toUpperCase()}${item.image.align.slice(1)}`] ?? ""}`}>
+                <img src={item.image.src} alt="" className={styles.imageBlock} />
+              </div>
+            );
+          }
           if (item.type === "stat_chart" && item.statChart) {
             const { title, entries } = item.statChart;
             return (

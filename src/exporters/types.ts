@@ -24,6 +24,7 @@ export interface Passage {
 
 export type IRBlock =
   | IRParagraphBlock
+  | IRImageBlock
   | IRChoiceBlock
   | IRSetBlock
   | IRIfBlock
@@ -35,6 +36,7 @@ export type IRBlock =
   | IRLineBreakBlock;
 
 export interface IRParagraphBlock { kind: 'paragraph'; text: string }
+export interface IRImageBlock { kind: 'image'; src: string; align?: 'left' | 'right' | 'center' }
 export interface IRSetBlock { kind: 'set'; name: string; op: string; expr: string }
 export interface IRChoiceBlock { kind: 'choice'; options: IRChoiceOption[] }
 export interface IRIfBlock { kind: 'if'; branches: IRIfBranch[] }

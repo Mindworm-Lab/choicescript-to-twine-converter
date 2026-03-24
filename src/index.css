@@ -50,6 +50,7 @@ body { margin: 0; padding: 0; overflow: hidden; }
 
   /* Block kind accents */
   --kind-paragraph:   #4fc87a;
+  --kind-image:       #d78cff;
   --kind-choice:      #4da3e0;
   --kind-if:          #e8a838;
   --kind-set:         #a47ef5;

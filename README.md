@@ -63,6 +63,7 @@ Sample project files are available in `public/`:
 
 - `demo-solo-leveling.json`
 - `my-homestead-life.json`
+- `demo-image-workflow.json`
 
 ## Project Structure
 

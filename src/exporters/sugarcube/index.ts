@@ -38,6 +38,11 @@ export function exportSugarCube(game: GameData, style?: ExportStyle): string {
     `body{background-color:${s.storyBg};color:${s.storyText};font-family:${s.fontFamily};${fontSizeRule}}`,
     `a.link-internal{color:${s.accentColor};}`,
     `.cs-fill{background:${s.barColor};}`,
+    `.cs-image-wrap{margin:0.75em 0;}`,
+    `.cs-image-wrap img{display:block;max-width:100%;height:auto;border-radius:4px;}`,
+    `.cs-image-left img{margin-right:auto;}`,
+    `.cs-image-center img{margin-left:auto;margin-right:auto;}`,
+    `.cs-image-right img{margin-left:auto;}`,
   ].join('\n');
   passageMap.set('StoryStyle', storyStyle);
 
@@ -60,6 +65,12 @@ function blockToMarkup(block: IRBlock, sceneId: string, game: GameData): string 
   switch (block.kind) {
     case 'paragraph':
       return `<p>${translateText(block.text)}</p>`;
+
+    case 'image': {
+      const alignClass = block.align ? ` cs-image-${block.align}` : '';
+      const escapedSrc = block.src.replace(/"/g, '&quot;');
+      return `<p class="cs-image-wrap${alignClass}"><img src="${escapedSrc}" alt=""></p>`;
+    }
 
     case 'page_break':
       return '<hr class="cs-page-break">';

@@ -9,6 +9,11 @@ export function generateBlock(block: Block, indent: number): string[] {
       if (!block.text) return [];
       return block.text.split("\n").map(line => prefix + line);
 
+    case "image": {
+      const align = block.align === "none" ? "" : ` ${block.align}`;
+      return [`${prefix}*image ${block.src}${align}`.trimEnd()];
+    }
+
     case "comment":
       return [`${prefix}* ${block.text}`];
 

@@ -1,0 +1,112 @@
+{
+  "id": "demo-image-workflow-1",
+  "title": "Image Workflow Demo",
+  "author": "Mindworm Lab",
+  "variables": [
+    {
+      "id": "v_seen",
+      "name": "seen_gallery",
+      "type": "boolean",
+      "defaultValue": false,
+      "description": "Tracks whether the gallery scene was visited"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc_startup",
+      "filename": "startup",
+      "title": "Startup",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "id": "b_intro",
+          "text": "This demo shows the new image block flow. Add an image block, paste a URL, choose alignment, and export."
+        },
+        {
+          "kind": "image",
+          "id": "b_hero_img",
+          "src": "https://picsum.photos/seed/cyoa-cover/900/420",
+          "align": "center"
+        },
+        {
+          "kind": "choice",
+          "id": "b_start_choice",
+          "options": [
+            {
+              "id": "opt_gallery",
+              "text": "Open the gallery scene",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "goto_scene",
+                  "id": "b_to_gallery",
+                  "sceneName": "gallery",
+                  "label": ""
+                }
+              ]
+            },
+            {
+              "id": "opt_end",
+              "text": "End now",
+              "conditionMode": "simple",
+              "conditions": [],
+              "conditionRaw": "",
+              "visibility": "if",
+              "blocks": [
+                {
+                  "kind": "ending",
+                  "id": "b_end_now"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sc_gallery",
+      "filename": "gallery",
+      "title": "Gallery",
+      "blocks": [
+        {
+          "kind": "set",
+          "id": "b_set_seen",
+          "variable": "seen_gallery",
+          "operator": "=",
+          "value": "true"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_gallery_intro",
+          "text": "You can mix multiple image blocks with text paragraphs for story pacing."
+        },
+        {
+          "kind": "image",
+          "id": "b_left_img",
+          "src": "https://picsum.photos/seed/cyoa-left/640/360",
+          "align": "left"
+        },
+        {
+          "kind": "image",
+          "id": "b_right_img",
+          "src": "https://picsum.photos/seed/cyoa-right/640/360",
+          "align": "right"
+        },
+        {
+          "kind": "paragraph",
+          "id": "b_gallery_outro",
+          "text": "When you export to SugarCube, image blocks become <img> tags with matching alignment classes."
+        },
+        {
+          "kind": "goto_scene",
+          "id": "b_back_to_start",
+          "sceneName": "startup",
+          "label": ""
+        }
+      ]
+    }
+  ]
+}

@@ -123,6 +123,13 @@ function convertBlock(block: Block, sceneId: string): IRBlock | null {
     case 'paragraph':
       return { kind: 'paragraph', text: block.text };
 
+    case 'image':
+      return {
+        kind: 'image',
+        src: block.src,
+        ...(block.align !== 'none' ? { align: block.align } : {}),
+      };
+
     case 'set':
       return { kind: 'set', name: block.variable, op: block.operator, expr: block.value };
 

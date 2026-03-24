@@ -39,6 +39,7 @@
 }
 
 .blockItem[data-kind="paragraph"]  .blockThread { background: var(--kind-paragraph); }
+.blockItem[data-kind="image"]      .blockThread { background: var(--kind-image); }
 .blockItem[data-kind="choice"]     .blockThread { background: var(--kind-choice); }
 .blockItem[data-kind="if"]         .blockThread { background: var(--kind-if); }
 .blockItem[data-kind="set"]        .blockThread { background: var(--kind-set); }
@@ -91,6 +92,7 @@
 .blockItem[data-kind="ending"]     .kindBadge { color: var(--kind-ending);     background: rgba(255,149,128,0.13); }
 .blockItem[data-kind="comment"]    .kindBadge { color: var(--kind-comment);    background: rgba(107,114,153,0.13); }
 .blockItem[data-kind="paragraph"]  .kindBadge { color: var(--kind-paragraph);  background: rgba( 79,200,122,0.13); }
+.blockItem[data-kind="image"]      .kindBadge { color: var(--kind-image);      background: rgba(215,140,255,0.13); }
 .blockItem[data-kind="choice"]     .kindBadge { color: var(--kind-choice);     background: rgba( 77,163,224,0.13); }
 .blockItem[data-kind="if"]         .kindBadge { color: var(--kind-if);         background: rgba(232,168, 56,0.13); }
 .blockItem[data-kind="stat_chart"] .kindBadge { color: var(--kind-stat-chart); background: rgba(244,114,182,0.13); }
