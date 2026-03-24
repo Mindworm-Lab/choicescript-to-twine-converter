@@ -45,11 +45,11 @@
   flex: 1;
   overflow-y: auto;
   padding: 28px 36px 36px;
-  line-height: 1.85;
+  line-height: 1.68;
 }
 
 .paragraph {
-  margin: 0 0 1.3em 0;
+  margin: 0 0 0.72em 0;
   font-size: 14.5px;
   color: #cdd2e8;
   white-space: pre-wrap;

@@ -36,6 +36,7 @@ export function exportSugarCube(game: GameData, style?: ExportStyle): string {
     `#ui-bar-body{background-color:${s.sidebarBg};color:${s.sidebarText};}`,
     `#ui-bar-body .macro-label,#ui-bar-body .cs-label{color:${s.sidebarText};}`,
     `body{background-color:${s.storyBg};color:${s.storyText};font-family:${s.fontFamily};${fontSizeRule}}`,
+    `#passages p{margin:0 0 0.38em 0;line-height:1.56;}`,
     `a.link-internal{color:${s.accentColor};}`,
     `.cs-fill{background:${s.barColor};}`,
     `.cs-image-wrap{margin:0.75em 0;}`,

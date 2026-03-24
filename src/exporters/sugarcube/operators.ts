@@ -38,6 +38,71 @@ export function translateSetExpr(_name: string, expr: string): string {
   return translateExpr(expr);
 }
 
+function parseMultireplaceBody(body: string): { expr: string; options: string[] } | null {
+  const trimmed = body.trim();
+  if (!trimmed) return null;
+
+  let expr = "";
+  let rest = "";
+
+  if (trimmed.startsWith("(")) {
+    let depth = 0;
+    let end = -1;
+    for (let i = 0; i < trimmed.length; i++) {
+      const ch = trimmed[i];
+      if (ch === "(") depth++;
+      else if (ch === ")") {
+        depth--;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (end === -1) return null;
+    expr = trimmed.slice(0, end + 1).trim();
+    rest = trimmed.slice(end + 1).trim();
+  } else {
+    const splitAt = trimmed.search(/\s/);
+    if (splitAt === -1) return null;
+    expr = trimmed.slice(0, splitAt).trim();
+    rest = trimmed.slice(splitAt + 1).trim();
+  }
+
+  if (!expr || !rest) return null;
+  return { expr, options: rest.split("|") };
+}
+
+function replaceMultireplace(text: string): string {
+  let counter = 0;
+  return text.replace(/@\{([^{}]+)\}/g, (_, body: string) => {
+    const parsed = parseMultireplaceBody(body);
+    if (!parsed) return _;
+
+    const expression = translateExpr(parsed.expr);
+    const options = parsed.options;
+
+    if (options.length === 0) return "";
+    if (options.length === 1) return options[0];
+
+    if (options.length === 2) {
+      return `<<if (${expression})>>${options[0]}<<else>>${options[1]}<</if>>`;
+    }
+
+    const varName = `_mr${counter++}`;
+    let markup = `<<set ${varName} = (${expression})>>`;
+    for (let i = 0; i < options.length; i++) {
+      if (i === 0) {
+        markup += `<<if ${varName} == ${i + 1}>>${options[i]}`;
+      } else {
+        markup += `<<elseif ${varName} == ${i + 1}>>${options[i]}`;
+      }
+    }
+    markup += `<<else>>${options[0]}<</if>>`;
+    return markup;
+  });
+}
+
 /**
  * Prefix bare identifier words in a CS expression with $ for SugarCube variables.
  * Skips: JS keywords, numeric literals, string literals, already-prefixed vars.
@@ -75,7 +140,7 @@ function prefixVariables(expr: string): string {
  *   ${var}    → <<print $var>>
  */
 export function translateText(text: string): string {
-  let result = text;
+  let result = replaceMultireplace(text);
 
   // 1. $!{var} — capitalize first letter
   result = result.replace(/\$!\{(\w+)\}/g, (_, v: string) =>
