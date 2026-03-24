@@ -56,6 +56,7 @@ function defaultProject(): GameProject {
 interface ProjectState {
   project: GameProject;
   activeSceneId: string;
+  activeBlockId: string | null;
   revision: number;
   history: GameProject[];
   historyIndex: number;
@@ -68,6 +69,7 @@ interface ProjectState {
   deleteScene: (sceneId: string) => void;
   reorderScenes: (fromIndex: number, toIndex: number) => void;
   setActiveScene: (sceneId: string) => void;
+  setActiveBlock: (blockId: string | null) => void;
   updateSceneMeta: (sceneId: string, partial: Partial<Pick<Scene, "filename" | "title">>) => void;
 
   // Variables
@@ -130,6 +132,7 @@ export const useProjectStore = create<ProjectState>()(
   immer((set) => ({
     project: defaultProject(),
     activeSceneId: "",
+    activeBlockId: null,
     revision: 0,
     history: [],
     historyIndex: -1,
@@ -167,6 +170,11 @@ export const useProjectStore = create<ProjectState>()(
 
     setActiveScene: (sceneId) => set(state => {
       state.activeSceneId = sceneId;
+      state.activeBlockId = null;
+    }),
+
+    setActiveBlock: (blockId) => set(state => {
+      state.activeBlockId = blockId;
     }),
 
     updateSceneMeta: (sceneId, partial) => set(state => {
@@ -385,6 +393,7 @@ export const useProjectStore = create<ProjectState>()(
     loadProject: (project) => set(state => {
       state.project = project;
       state.activeSceneId = project.scenes[0]?.id ?? "";
+      state.activeBlockId = null;
       state.revision += 1;
       state.history = [];
       state.historyIndex = -1;

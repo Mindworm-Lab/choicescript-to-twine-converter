@@ -27,6 +27,8 @@ const INLINE_KINDS = new Set(["image", "set", "goto", "goto_scene", "label", "fi
 export default function BlockItem({ sceneId, blockPath, block, index, blocksLength, nestLevel }: Props) {
   const deleteBlock = useProjectStore(s => s.deleteBlock);
   const moveBlock = useProjectStore(s => s.moveBlock);
+  const activeBlockId = useProjectStore(s => s.activeBlockId);
+  const setActiveBlock = useProjectStore(s => s.setActiveBlock);
 
   const blockFullPath = [...blockPath, index];
   const isInline = INLINE_KINDS.has(block.kind);
@@ -59,7 +61,13 @@ export default function BlockItem({ sceneId, blockPath, block, index, blocksLeng
   }
 
   return (
-    <div className={styles.blockItem} data-kind={block.kind}>
+    <div
+      className={styles.blockItem}
+      data-kind={block.kind}
+      data-selected={activeBlockId === block.id}
+      onClickCapture={() => setActiveBlock(block.id)}
+      onFocusCapture={() => setActiveBlock(block.id)}
+    >
       <div className={styles.blockThread} aria-hidden="true" />
       <div className={styles.blockInner}>
         <div className={styles.blockRow}>

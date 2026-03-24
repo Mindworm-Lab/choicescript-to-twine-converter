@@ -66,6 +66,59 @@ function estimateSceneTextSize(blocks: Block[]): number {
   return total;
 }
 
+function findBlockById(blocks: Block[], targetId: string): Block | null {
+  for (const block of blocks) {
+    if (block.id === targetId) return block;
+    if (block.kind === "choice") {
+      for (const option of block.options) {
+        const found = findBlockById(option.blocks, targetId);
+        if (found) return found;
+      }
+    }
+    if (block.kind === "if") {
+      for (const branch of block.branches) {
+        const found = findBlockById(branch.blocks, targetId);
+        if (found) return found;
+      }
+    }
+  }
+  return null;
+}
+
+function candidateAnchors(block: Block): string[] {
+  switch (block.kind) {
+    case "paragraph": {
+      const firstLine = block.text
+        .split("\n")
+        .map(line => line.trim())
+        .find(Boolean);
+      return firstLine ? [firstLine] : [];
+    }
+    case "image":
+      return [block.align === "none" ? `*image ${block.src}` : `*image ${block.src} ${block.align}`];
+    case "set":
+      return [block.operator === "=" ? `*set ${block.variable} ${block.value}` : `*set ${block.variable} ${block.operator}${block.value}`];
+    case "goto":
+      return [`*goto ${block.label}`];
+    case "goto_scene":
+      return [block.label ? `*goto_scene ${block.sceneName} ${block.label}` : `*goto_scene ${block.sceneName}`];
+    case "label":
+      return [`*label ${block.name}`];
+    case "finish":
+      return ["*finish"];
+    case "ending":
+      return ["*ending"];
+    case "comment":
+      return [`* ${block.text}`];
+    case "choice":
+      return ["*choice", "*fake_choice"];
+    case "if":
+      return ["*if (", "*elseif (", "*else"];
+    case "stat_chart":
+      return ["*stat_chart"];
+  }
+}
+
 export default function CodePreview() {
   const [tab, setTab] = useState<Tab>("code");
   const activeScene = useActiveScene();
@@ -99,6 +152,7 @@ export default function CodePreview() {
 function CodeEditor() {
   const project = useProjectStore(s => s.project);
   const activeScene = useActiveScene();
+  const activeBlockId = useProjectStore(s => s.activeBlockId);
   const replaceSceneBlocks = useProjectStore(s => s.replaceSceneBlocks);
   const replaceProjectMeta = useProjectStore(s => s.replaceProjectMeta);
   const [forceLoadLargeCode, setForceLoadLargeCode] = useState(false);
@@ -121,12 +175,46 @@ function CodeEditor() {
   const parseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const syncMatch = (() => {
+    if (deferLargeSceneCode || !activeScene || !activeBlockId || !generatedCode || isFocused) {
+      return null;
+    }
+
+    const block = findBlockById(activeScene.blocks, activeBlockId);
+    if (!block) return null;
+
+    const anchors = candidateAnchors(block);
+    for (const anchor of anchors) {
+      if (!anchor) continue;
+      const offset = generatedCode.indexOf(anchor);
+      if (offset !== -1) {
+        const line = generatedCode.slice(0, offset).split("\n").length;
+        return { line, offset, matchedLength: anchor.length };
+      }
+    }
+
+    return null;
+  })();
+
   useEffect(
     () => () => {
       if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
     },
     [],
   );
+
+  useEffect(() => {
+    if (!syncMatch) return;
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.setSelectionRange(syncMatch.offset, syncMatch.offset + Math.max(1, syncMatch.matchedLength));
+
+    const textBefore = generatedCode.slice(0, syncMatch.offset);
+    const lineHeight = 19;
+    const targetLineIndex = Math.max(0, textBefore.split("\n").length - 1);
+    textarea.scrollTop = Math.max(0, targetLineIndex * lineHeight - textarea.clientHeight * 0.35);
+  }, [generatedCode, syncMatch]);
 
   function scheduleParseAndUpdate(text: string) {
     if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
@@ -224,6 +312,7 @@ function CodeEditor() {
         <button className={styles.codeToolBtn} onClick={insertImageFromUrl}>
           + Insert Image URL
         </button>
+        {syncMatch?.line && <span className={styles.syncedLine}>Synced line {syncMatch.line}</span>}
       </div>
       {deferLargeSceneCode ? (
         <div className={styles.largeSceneNotice}>

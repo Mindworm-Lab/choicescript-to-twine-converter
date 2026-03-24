@@ -32,6 +32,11 @@
   background: var(--editor-hover);
 }
 
+.blockItem[data-selected="true"] {
+  background: rgba(124,108,244,0.12);
+  box-shadow: inset 0 0 0 1px rgba(124,108,244,0.35);
+}
+
 /* Thin colored left indicator strip */
 .blockThread {
   width: 2px;
