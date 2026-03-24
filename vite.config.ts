@@ -1,4 +1,4 @@
-import { defineConfig, Plugin } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -35,7 +35,6 @@ function sugarCubeTemplatePlugin(): Plugin {
       };
 
       // Execute format.js with our mock window (runs synchronously)
-      // eslint-disable-next-line no-new-func
       new Function('window', code)(mockWindow);
 
       if (!template) {

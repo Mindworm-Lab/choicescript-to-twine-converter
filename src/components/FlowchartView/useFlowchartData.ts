@@ -1,4 +1,4 @@
-import { MarkerType, type Edge } from "@xyflow/react";
+import { MarkerType, type Edge, type Node } from "@xyflow/react";
 import type { Scene, Block, ChoiceOption, IfBranch } from "../../types";
 
 export interface SceneNodeData extends Record<string, unknown> {
@@ -6,6 +6,8 @@ export interface SceneNodeData extends Record<string, unknown> {
   isActive: boolean;
   isStartup: boolean;
 }
+
+export type SceneFlowNode = Node<SceneNodeData, "sceneNode">;
 
 // ─── Edge extraction ──────────────────────────────────────────────────────────
 

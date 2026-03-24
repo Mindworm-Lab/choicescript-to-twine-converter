@@ -88,7 +88,6 @@ function evalConditionRaw(raw: string, vars: Record<string, string | number | bo
       .replace(/\bor\b/gi, "||")
       .replace(/\bnot\b/gi, "!")
       .replace(/([^!<>])=([^=])/g, "$1==$2");
-    // eslint-disable-next-line no-new-func
     return Boolean(new Function(`"use strict"; return (${expr});`)());
   } catch {
     return true;
@@ -163,7 +162,6 @@ function evalValue(
       const rep = typeof v === "string" ? `"${v}"` : String(v);
       expr = expr.replace(new RegExp(`\\b${name}\\b`, "g"), rep);
     }
-    // eslint-disable-next-line no-new-func
     const result = new Function(`"use strict"; return (${expr});`)();
     if (typeof result === "number" || typeof result === "boolean") return result;
     return String(result);

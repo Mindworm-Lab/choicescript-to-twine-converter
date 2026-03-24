@@ -1,6 +1,6 @@
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
-import type { SceneNodeData } from "./useFlowchartData";
+import type { SceneFlowNode, SceneNodeData } from "./useFlowchartData";
 import styles from "./FlowchartView.module.css";
 
 function firstParagraphText(data: SceneNodeData["scene"]): string {
@@ -13,7 +13,7 @@ function firstParagraphText(data: SceneNodeData["scene"]): string {
   return "";
 }
 
-export default function SceneNode({ data }: NodeProps<SceneNodeData>) {
+export default function SceneNode({ data }: NodeProps<SceneFlowNode>) {
   const preview = firstParagraphText(data.scene);
   const blockCount = data.scene.blocks.length;
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useProjectStore } from "./store/projectStore";
 import { useActiveScene } from "./store/selectors";
 import { useAutoSave, loadAutosave } from "./hooks/useAutoSave";
@@ -16,16 +16,11 @@ import styles from "./App.module.css";
 export default function App() {
   const loadProject = useProjectStore(s => s.loadProject);
   const activeScene = useActiveScene();
-  const [autosavePrompt, setAutosavePrompt] = useState(false);
+  const [autosavePrompt, setAutosavePrompt] = useState(() => Boolean(loadAutosave()));
   const [viewMode, setViewMode] = useState<"editor" | "flowchart" | "style">("editor");
 
   useAutoSave();
   useKeyboardShortcuts();
-
-  useEffect(() => {
-    const saved = loadAutosave();
-    if (saved) setAutosavePrompt(true);
-  }, []);
 
   function handleRestoreAutosave() {
     const saved = loadAutosave();

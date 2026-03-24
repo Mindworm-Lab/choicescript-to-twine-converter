@@ -9,7 +9,7 @@ import {
   useEdgesState,
   useReactFlow,
   ReactFlowProvider,
-  type Node,
+  type NodeTypes,
   type NodeMouseHandler,
   type OnNodeDrag,
 } from "@xyflow/react";
@@ -20,10 +20,10 @@ import { useActiveScene } from "../../store/selectors";
 import SceneNode from "./SceneNode";
 import BlockList from "../BlockEditor/BlockList";
 import AddBlockMenu from "../BlockEditor/AddBlockMenu";
-import { buildEdges, computeAutoLayout, type SceneNodeData } from "./useFlowchartData";
+import { buildEdges, computeAutoLayout, type SceneFlowNode } from "./useFlowchartData";
 import styles from "./FlowchartView.module.css";
 
-const NODE_TYPES = { sceneNode: SceneNode };
+const NODE_TYPES: NodeTypes = { sceneNode: SceneNode };
 
 const DEFAULT_EDGE_OPTIONS = {
   type: "default" as const,
@@ -59,7 +59,7 @@ function FlowchartInner({ onOpenEditor }: { onOpenEditor: () => void }) {
     [scenes, derivedEdges],
   );
 
-  const initialNodes: Node<SceneNodeData>[] = useMemo(
+  const initialNodes: SceneFlowNode[] = useMemo(
     () =>
       scenes.map(scene => ({
         id: scene.id,

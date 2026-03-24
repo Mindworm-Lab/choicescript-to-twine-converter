@@ -53,17 +53,13 @@ function CodeEditor() {
   const [isFocused, setIsFocused] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const parseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const activeSceneIdRef = useRef(activeScene?.id);
 
-  // When scene changes or not focused, sync textarea with generated code
-  useEffect(() => {
-    const sceneChanged = activeScene?.id !== activeSceneIdRef.current;
-    activeSceneIdRef.current = activeScene?.id;
-    if (!isFocused || sceneChanged) {
-      setLocalCode(generatedCode);
-      setParseError(null);
-    }
-  }, [generatedCode, isFocused, activeScene?.id]);
+  useEffect(
+    () => () => {
+      if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
+    },
+    [],
+  );
 
   function scheduleParseAndUpdate(text: string) {
     if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
@@ -93,6 +89,8 @@ function CodeEditor() {
   }
 
   function handleFocus() {
+    setLocalCode(generatedCode);
+    setParseError(null);
     setIsFocused(true);
   }
 
@@ -125,7 +123,7 @@ function CodeEditor() {
       )}
       <textarea
         className={styles.codeTextarea}
-        value={localCode}
+        value={isFocused ? localCode : generatedCode}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

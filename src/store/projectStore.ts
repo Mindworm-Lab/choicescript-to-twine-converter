@@ -390,14 +390,14 @@ export const useProjectStore = create<ProjectState>()(
       const scene = findScene(state.project, sceneId);
       if (!scene) return;
       pushHistory(state, state.project);
-      scene.blocks = blocks as any;
+      scene.blocks = blocks;
     }),
 
     replaceProjectMeta: (partial) => set(state => {
       pushHistory(state, state.project);
       if (partial.title !== undefined) state.project.title = partial.title;
       if (partial.author !== undefined) state.project.author = partial.author;
-      if (partial.variables !== undefined) state.project.variables = partial.variables as any;
+      if (partial.variables !== undefined) state.project.variables = partial.variables;
     }),
 
     updateNodePositions: (positions) => set(state => {
