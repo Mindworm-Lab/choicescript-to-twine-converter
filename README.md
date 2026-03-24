@@ -80,6 +80,7 @@ Sample project files are available in `public/`:
 - Startup scene conventions must be respected for exports
 - Autosave uses browser localStorage limits
 - Current export target focuses on SugarCube format
+- In Preview/Twine export, a scene that ends with unconditional `goto`/`goto_scene` will auto-navigate immediately (add a `choice` first if you want the player to pause on that scene)
 
 ## License
 
